@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lição 0005: Proteção em Trânsito e a Revolução do TLS 1.3</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .handshake-comparison {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    @media (min-width: 700px) {
+      .handshake-comparison {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .handshake-card {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+    .handshake-card.modern {
+      border-color: var(--success);
+      background: rgba(46, 160, 67, 0.04);
+    }
+    .rtt-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      position: relative;
+    }
+    .rtt-packet {
+      padding: 0.65rem 0.85rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 3px solid var(--accent);
+      background: var(--bg);
+    }
+    .packet-server {
+      border-left-color: var(--warning);
+    }
+    .packet-data {
+      border-left-color: var(--success);
+      background: rgba(46, 160, 67, 0.15);
+      font-weight: bold;
+    }
+    .rtt-badge {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--accent);
+    }
+    .interactive-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.7rem 1.4rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.15s ease;
+    }
+    .interactive-btn:hover {
+      background: var(--accent-hover);
+    }
+    .ban-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.92rem;
+    }
+    .ban-table th, .ban-table td {
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--card-border);
+      text-align: left;
+    }
+    .ban-table th {
+      background: var(--code-bg);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="lesson-badge">Lição 0005 • Bloco 3: Proteção em Trânsito</span>
+    <h1>Proteção de Dados em Trânsito: O Salto para o TLS 1.3</h1>
+    <p>Objetivo: Compreender como o tráfego de rede é protegido entre o cliente e o servidor backend, a redução drástica de latência no handshake do TLS 1.3 (1-RTT) e o banimento definitivo de algoritmos inseguros.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. O que é o TLS (e por que "SSL" é um termo defasado)</h2>
+      <p>Quando você acessa uma API ou site com <code>https://</code>, você está usando o <strong>TLS (Transport Layer Security)</strong>. O protocolo antigo original chamava-se <strong>SSL (Secure Sockets Layer)</strong> e foi descontinuado há mais de 10 anos devido a falhas históricas irreparáveis (como o ataque POODLE).</p>
+
+      <div class="card alert-success">
+        <p><strong>Dica de Ouro para a Apresentação:</strong> Dizer "certificado SSL" no mercado ou na frente de um professor técnico é uma gafe comum. O termo correto e padronizado pela indústria é <strong>TLS</strong>.</p>
+      </div>
+
+      <p>O papel do TLS em trânsito é resolver três problemas simultâneos:</p>
+      <ul>
+        <li><strong>Confidencialidade:</strong> Ninguém na rede Wi-Fi ou no provedor consegue ler o conteúdo das mensagens.</li>
+        <li><strong>Integridade:</strong> Ninguém consegue alterar os pacotes em trânsito sem ser detectado.</li>
+        <li><strong>Autenticidade:</strong> O cliente tem certeza de que está conversando com o servidor real, e não com um impostor (ataque Man-in-the-Middle).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2. O que é o Handshake Criptográfico?</h2>
+      <p>Antes de o cliente enviar a primeira requisição <code>GET /usuarios</code> ou <code>POST /login</code>, o cliente e o servidor precisam realizar uma "conversa de apresentação" chamada <strong>Handshake</strong>.</p>
+      <p>Nessa conversa, eles precisam combinar uma <strong>chave de sessão efêmera</strong> (temporária) para criptografar todo o tráfego via AES-GCM, sem que ninguém monitorando os cabos da internet descubra qual chave foi combinada.</p>
+    </section>
+
+    <!-- Comparador Interativo de Handshake -->
+    <section class="simulator">
+      <div class="simulator-header">
+        <h2>Simulador Interativo: A Batalha dos Handshakes (TLS 1.2 vs TLS 1.3)</h2>
+        <span class="lesson-badge">Latência na Prática</span>
+      </div>
+      <p>Clique no botão para simular a negociação de rede com uma latência típica de 50ms por salto (Round-Trip Time - RTT):</p>
+
+      <button class="interactive-btn" id="btn-sim-handshake" onclick="runHandshakeSim()">Simular Conexão em Tempo Real</button>
+
+      <div class="handshake-comparison">
+        <!-- TLS 1.2 Legado -->
+        <div class="handshake-card" id="card-tls12">
+          <h3>TLS 1.2 (Padrão Antigo - 2 RTT)</h3>
+          <p style="color:var(--text-muted); font-size:0.85rem;">Exigia 2 voltas completas de rede antes de autorizar o primeiro byte de dados.</p>
+          <div class="rtt-timeline" id="timeline-12">
+            <div class="rtt-packet">Aguardando início...</div>
+          </div>
+          <div style="margin-top:1rem; font-family:var(--font-mono); font-size:0.88rem;" id="timer-12">Tempo Total: -- ms</div>
+        </div>
+
+        <!-- TLS 1.3 Moderno -->
+        <div class="handshake-card modern" id="card-tls13">
+          <h3>TLS 1.3 (RFC 8446 - 1 RTT) 🚀</h3>
+          <p style="color:var(--text-muted); font-size:0.85rem;">O cliente já adivinha e envia parâmetros no 1º pacote. Corta a latência pela metade!</p>
+          <div class="rtt-timeline" id="timeline-13">
+            <div class="rtt-packet">Aguardando início...</div>
+          </div>
+          <div style="margin-top:1rem; font-family:var(--font-mono); font-size:0.88rem; color:var(--success);" id="timer-13">Tempo Total: -- ms</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. A Faxina Histórica do TLS 1.3: Fim das Cifras Fracas</h2>
+      <p>A versão 1.3 (lançada na RFC 8446) não foi apenas mais rápida: ela fez uma <strong>limpeza drástica</strong> em mais de 20 anos de algoritmos obsoletos.</p>
+
+      <table class="ban-table">
+        <thead>
+          <tr>
+            <th>Algoritmo / Prática</th>
+            <th>Status no TLS 1.3</th>
+            <th>Motivo da Decisão de Engenharia</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Modo CBC (AES-CBC)</strong></td>
+            <td style="color:var(--danger); font-weight:bold;">❌ Banido</td>
+            <td>Vulnerável a ataques de Padding Oracle e falta de autenticidade (vimos na Lição 3!).</td>
+          </tr>
+          <tr>
+            <td><strong>Troca Estática RSA</strong></td>
+            <td style="color:var(--danger); font-weight:bold;">❌ Banido</td>
+            <td>Não oferecia <em>Forward Secrecy</em> (se a chave do servidor vazasse no futuro, todo o tráfego gravado no passado podia ser lido).</td>
+          </tr>
+          <tr>
+            <td><strong>MD5 e SHA-1</strong></td>
+            <td style="color:var(--danger); font-weight:bold;">❌ Banido</td>
+            <td>Quebrados matematicamente por colisões.</td>
+          </tr>
+          <tr>
+            <td><strong>Cifras AEAD (AES-GCM)</strong></td>
+            <td style="color:var(--success); font-weight:bold;">✅ Obrigatório</td>
+            <td>O TLS 1.3 só aceita algoritmos que oferecem integridade e sigilo simultâneos (AES-GCM e ChaCha20-Poly1305).</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Quiz Interativo -->
+    <section class="quiz-widget" id="quiz-rtt">
+      <h2>Verificação de Aprendizado</h2>
+      <p class="quiz-question">1. Por que o handshake do TLS 1.3 é significativamente mais rápido que o do TLS 1.2?</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">Elimina totalmente criptografia na transmissão</button>
+        <button class="quiz-option" data-correct="true">Reduz as idas e voltas de negociação</button>
+        <button class="quiz-option" data-correct="false">Utiliza compactação pesada de todos pacotes</button>
+        <button class="quiz-option" data-correct="false">Substitui protocolo TCP por conexões UDP</button>
+      </div>
+      <div class="quiz-feedback" id="quiz-feedback-rtt"></div>
+    </section>
+
+    <section class="quiz-widget" id="quiz-fs">
+      <p class="quiz-question">2. Por que o TLS 1.3 proibiu o uso de troca estática de chaves via RSA puro?</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">Exige conexões com largura banda alta</button>
+        <button class="quiz-option" data-correct="false">Gera textos cifrados de tamanho fixo</button>
+        <button class="quiz-option" data-correct="true">Inviabiliza a garantia de Forward Secrecy</button>
+        <button class="quiz-option" data-correct="false">Impede suporte navegadores para dispositivos móveis</button>
+      </div>
+      <div class="quiz-feedback" id="quiz-feedback-fs"></div>
+    </section>
+
+    <section class="card alert-success">
+      <h3>Fontes de Consulta Primárias</h3>
+      <ul>
+        <li><a href="https://datatracker.ietf.org/doc/html/rfc8446" target="_blank" rel="noopener">RFC 8446: The Transport Layer Security (TLS) Protocol Version 1.3</a></li>
+        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Protection_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP: Transport Layer Protection Cheat Sheet</a></li>
+        <li><a href="../reference/02-dicionario-de-siglas.html">Referência: Dicionário de Siglas (TLS, RTT, AEAD, Forward Secrecy)</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="nav-footer">
+    <a href="0004-kms-e-envelope-encryption.html">← Lição 0004: KMS & Envelope</a>
+    <span>Lembrete: Faça suas perguntas para o assistente caso reste qualquer dúvida!</span>
+    <a href="../reference/02-dicionario-de-siglas.html">Dicionário de Siglas →</a>
+  </footer>
+
+  <script>
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function runHandshakeSim() {
+      const btn = document.getElementById('btn-sim-handshake');
+      btn.disabled = true;
+
+      const t12 = document.getElementById('timeline-12');
+      const t13 = document.getElementById('timeline-13');
+      t12.innerHTML = '';
+      t13.innerHTML = '';
+
+      document.getElementById('timer-12').innerText = 'Tempo: Calculando...';
+      document.getElementById('timer-13').innerText = 'Tempo: Calculando...';
+
+      // Simulação Paralela com 50ms por salto (RTT = 100ms ida e volta)
+      // Passo 1: ClientHello
+      t12.innerHTML += '<div class="rtt-packet"><span>→ Client Hello (Proposta)</span><span class="rtt-badge">Ida 1</span></div>';
+      t13.innerHTML += '<div class="rtt-packet"><span>→ Client Hello + Chave Efêmera</span><span class="rtt-badge">Ida 1</span></div>';
+      await sleep(400);
+
+      // Passo 2: Server Resposta
+      t12.innerHTML += '<div class="rtt-packet packet-server"><span>← Server Hello + Certificado</span><span class="rtt-badge">Volta 1</span></div>';
+      t13.innerHTML += '<div class="rtt-packet packet-server"><span>← Server Hello + Cert + Chave</span><span class="rtt-badge">Volta 1 (Fechou!)</span></div>';
+      await sleep(400);
+
+      // TLS 1.3 já pode enviar dados HTTP aqui! (1 RTT)
+      t13.innerHTML += '<div class="rtt-packet packet-data"><span>🚀 DADOS HTTP REAIS ENVIADOS!</span><span class="rtt-badge" style="background:#2ea043; color:white;">1 RTT</span></div>';
+      document.getElementById('timer-13').innerText = 'Tempo Total: ~100 ms (1 RTT) ⚡';
+
+      // TLS 1.2 ainda precisa de mais uma rodada completa de negociação
+      await sleep(400);
+      t12.innerHTML += '<div class="rtt-packet"><span>→ Troca de Chaves + Finished</span><span class="rtt-badge">Ida 2</span></div>';
+      await sleep(400);
+      t12.innerHTML += '<div class="rtt-packet packet-server"><span>← Session Ticket + Finished</span><span class="rtt-badge">Volta 2 (Fechou)</span></div>';
+      await sleep(400);
+      t12.innerHTML += '<div class="rtt-packet packet-data"><span>🚀 DADOS HTTP REAIS ENVIADOS!</span><span class="rtt-badge" style="background:#2ea043; color:white;">2 RTT</span></div>';
+      document.getElementById('timer-12').innerText = 'Tempo Total: ~200 ms (2 RTT) 🐢';
+
+      btn.disabled = false;
+    }
+
+    function setupQuiz(quizId, feedbackId, correctMsg, incorrectMsg) {
+      const container = document.getElementById(quizId);
+      const feedback = document.getElementById(feedbackId);
+      const buttons = container.querySelectorAll('.quiz-option');
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.correct === "true") b.classList.add('correct');
+          });
+
+          if (btn.dataset.correct === "true") {
+            feedback.style.display = 'block';
+            feedback.className = 'quiz-feedback alert-success';
+            feedback.innerHTML = `<strong>Correto!</strong> ${correctMsg}`;
+          } else {
+            btn.classList.add('incorrect');
+            feedback.style.display = 'block';
+            feedback.className = 'quiz-feedback alert-danger';
+            feedback.innerHTML = `<strong>Incorreto.</strong> ${incorrectMsg}`;
+          }
+        });
+      });
+    }
+
+    setupQuiz('quiz-rtt', 'quiz-feedback-rtt', 'O TLS 1.3 envia o compartilhamento de chave logo no primeiro pacote do cliente, reduzindo o handshake de 2-RTT para apenas 1-RTT.', 'A grande otimização do TLS 1.3 foi cortar pela metade as idas e voltas (Round-Trips) de rede necessárias para negociar a chave de sessão.');
+    setupQuiz('quiz-fs', 'quiz-feedback-fs', 'Com troca RSA estática, o vazamento futuro da chave privada do servidor permitia descriptografar todo o tráfego pretérito interceptado, violando o Forward Secrecy.', 'O RSA puro para troca de chaves foi eliminado para garantir que chaves de sessão sejam sempre efêmeras e descartáveis (PFS).');
+  </script>
+</body>
+</html>

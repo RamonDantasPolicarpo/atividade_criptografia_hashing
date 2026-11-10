@@ -15,8 +15,8 @@
   2. **Bloco 2: Proteção de Dados em Repouso (Data at Rest)** [CONCLUÍDO]
      - Lição 0003: Criptografia Simétrica Reversível vs Hashing, o erro do ECB/CBC e o padrão ouro AES-256-GCM (AEAD).
      - Lição 0004: Gerenciamento de Chaves (KMS & Envelope Encryption - DEK vs KEK).
-  3. **Bloco 3: Proteção de Dados em Trânsito (Data in Transit)** [PRÓXIMO - FALTAM 2 LIÇÕES]
-     - Lição 0005: TLS 1.3 - Handshake Otimizado (1-RTT/0-RTT) e Eliminação de Cifras Legadas.
-     - Lição 0006: Certificados Digitais, Autoridades Certificadoras (CAs) e mTLS entre Microsserviços.
+  3. **Bloco 3: Proteção de Dados em Trânsito (Data in Transit)** [EM ANDAMENTO]
+     - Lição 0005: TLS 1.3 - Handshake Otimizado (1-RTT/0-RTT) e Eliminação de Cifras Legadas. [ABERTA]
+     - Lição 0006: Certificados Digitais, Autoridades Certificadoras (CAs) e mTLS entre Microsserviços. [PRÓXIMA E ÚLTIMA]
   4. **Bloco 4: Estrutura da Apresentação & Slides Interativos** [FINALIZAÇÃO]
      - Roteiro de 20 min cronometrado (10 min por apresentador) com demonstrações ao vivo.
