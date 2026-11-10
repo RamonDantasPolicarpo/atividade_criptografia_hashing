@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lição 0003: Proteção em Repouso e o Padrão Ouro AES-GCM</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .component-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    @media (min-width: 600px) {
+      .component-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .comp-box {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+    .comp-box strong {
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+    .badge-iv { color: #d29922; }
+    .badge-cipher { color: #58a6ff; }
+    .badge-tag { color: #8957e5; }
+    .badge-key { color: #2ea043; }
+
+    .interactive-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.65rem 1.25rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.15s ease;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .interactive-btn:hover {
+      background: var(--accent-hover);
+    }
+    .btn-tamper {
+      background: #da3633;
+    }
+    .btn-tamper:hover {
+      background: #b62324;
+    }
+    .btn-secondary {
+      background: #30363d;
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      background: #484f58;
+    }
+    .status-box {
+      margin-top: 1rem;
+      padding: 0.85rem 1.1rem;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      display: none;
+    }
+    .status-ok {
+      background: rgba(46, 160, 67, 0.15);
+      border: 1px solid var(--success);
+      color: var(--text);
+    }
+    .status-error {
+      background: rgba(248, 81, 73, 0.15);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="lesson-badge">Lição 0003 • Bloco 2: Proteção em Repouso</span>
+    <h1>Proteção de Dados em Repouso: Criptografia Simétrica e AES-GCM</h1>
+    <p>Objetivo: Compreender a diferença entre hashing e criptografia simétrica reversível, os perigos de modos legados (ECB/CBC) e por que o AES-256-GCM é o padrão ouro moderno de criptografia autenticada.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. Hashing vs. Criptografia: A Distinção Crucial</h2>
+      <p>Na Lição 0001 e 0002, estudamos o <strong>Hashing</strong> (bcrypt/Argon2id), que é estritamente <strong>unidirecional</strong>. Ninguém nunca precisa saber o texto original de uma senha para autenticar um usuário.</p>
+      
+      <p>Porém, no backend você lida com dados que o sistema <strong>precisa recuperar e ler</strong> posteriormente: CPFs, números de cartão de crédito para cobrança, prontuários de saúde e chaves de API de terceiros. Para esses casos, o hash não serve: você é obrigado a usar <strong>Criptografia Simétrica</strong>.</p>
+
+      <div class="card">
+        <h3>A Anatomia do AES (Advanced Encryption Standard)</h3>
+        <p>O <strong>AES</strong> é uma cifra de bloco simétrica (opera em blocos fixos de 128 bits) aprovada mundialmente pelo NIST. Mas o algoritmo matemático puro do AES apenas cifra um bloquinho de cada vez. A forma como encadeamos múltiplos blocos de dados é chamada de <strong>Modo de Operação</strong>.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>2. Por que Modos Antigos Falham: O Desastre do ECB e CBC</h2>
+      
+      <div class="card alert-danger">
+        <h3>❌ Modo ECB (Electronic Codebook) - Proibido!</h3>
+        <p>No modo ECB, cada bloco de 16 bytes do dado é criptografado de forma isolada com a mesma chave. Se o dado tiver partes repetidas (como pixels do mesmo tom em uma imagem ou campos com zeros à esquerda), o texto cifrado gerará <strong>exatamente os mesmos blocos repetidos</strong>.</p>
+        <p><em>O Caso Famoso:</em> Criptografar uma imagem do mascote do Linux (Tux) em ECB gera um arquivo todo cifrado onde a silhueta inteira do pinguim continua perfeitamente visível a olho nu! Não há dispersão.</p>
+      </div>
+
+      <div class="card alert-warning">
+        <h3>⚠️ Modo CBC (Cipher Block Chaining) - Cuidado!</h3>
+        <p>O CBC resolveu o problema do ECB encadeando os blocos com um IV (Vetor de Inicialização). No entanto, o CBC <strong>não oferece autenticidade nem integridade</strong>. Um invasor que consiga interceptar o tráfego ou adulterar o banco de dados pode manipular bits do texto cifrado para enganar a aplicação (ataques como <em>Padding Oracle</em> e adulteração de valores numéricos).</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. A Solução Moderna: AES-GCM (Criptografia Autenticada - AEAD)</h2>
+      <p>A OWASP e as principais normas de segurança (PCI-DSS, HIPAA, LGPD) recomendam cifras do tipo <strong>AEAD (Authenticated Encryption with Associated Data)</strong>. O rei absoluto desse padrão é o <strong>AES-256-GCM</strong> (Galois/Counter Mode).</p>
+
+      <p>No AES-GCM, o resultado da criptografia não é apenas o texto cifrado. Ele produz obrigatoriamente 4 elementos integrados:</p>
+
+      <div class="component-grid">
+        <div class="comp-box">
+          <strong class="badge-key">1. Chave Secreta (Key - 256 bits)</strong>
+          Fica restrita ao backend (gerenciada via KMS ou cofre). Nunca é enviada ao cliente nem guardada em texto puro no banco.
+        </div>
+        <div class="comp-box">
+          <strong class="badge-iv">2. Vetor de Inicialização (IV / Nonce - 96 bits / 12 bytes)</strong>
+          Gerado aleatoriamente a cada operação. <strong>Regra de ouro:</strong> Nunca reutilize o mesmo IV com a mesma chave, ou o segredo matemático é quebrado!
+        </div>
+        <div class="comp-box">
+          <strong class="badge-cipher">3. Ciphertext (Texto Cifrado)</strong>
+          Os bytes criptografados do dado original, indistinguíveis de ruído estático aleatório.
+        </div>
+        <div class="comp-box">
+          <strong class="badge-tag">4. Authentication Tag (Tag de Autenticação - 128 bits)</strong>
+          Um selo criptográfico inviolável gerado sobre os dados. Se qualquer byte do texto cifrado for adulterado, a tag não baterá e a descriptografia rejeitará o dado!
+        </div>
+      </div>
+    </section>
+
+    <!-- Simulador Criptográfico Real com Web Crypto API -->
+    <section class="simulator">
+      <div class="simulator-header">
+        <h2>Laboratório Interativo: Criptografia e Adulteração com AES-256-GCM Real</h2>
+        <span class="lesson-badge">Web Crypto API Nativa</span>
+      </div>
+      <p>Este laboratório executa <strong>criptografia real AES-256-GCM</strong> diretamente na CPU do seu navegador.</p>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label for="plaintext-input">Dado Sensível para Proteger no Banco de Dados:</label>
+        <input type="text" id="plaintext-input" value="CPF: 042.891.339-10 | Limite: R$ 15.000,00">
+      </div>
+
+      <div>
+        <button class="interactive-btn" onclick="executeEncrypt()">1. Criptografar com AES-256-GCM</button>
+        <button class="interactive-btn btn-secondary" id="btn-decrypt" onclick="executeDecrypt(false)" disabled>2. Descriptografar Legitimamente</button>
+        <button class="interactive-btn btn-tamper" id="btn-tamper" onclick="executeDecrypt(true)" disabled>3. Simular Adulteração no Banco (Ataque)</button>
+      </div>
+
+      <div class="sim-output" id="crypto-output" style="display:none;">
+        <div class="sim-metric">
+          <span class="badge-iv">IV / Nonce (12 bytes Hex):</span>
+          <span id="out-iv">-</span>
+        </div>
+        <div class="sim-metric">
+          <span class="badge-cipher">Ciphertext (Hex):</span>
+          <span id="out-cipher">-</span>
+        </div>
+        <div class="sim-metric">
+          <span class="badge-tag">Auth Tag (16 bytes Hex):</span>
+          <span id="out-tag">-</span>
+        </div>
+      </div>
+
+      <div class="status-box" id="status-display"></div>
+    </section>
+
+    <!-- Quiz Interativo -->
+    <section class="quiz-widget" id="quiz-aes">
+      <h2>Verificação de Aprendizado</h2>
+      <p class="quiz-question">1. Por que o modo AES-ECB (Electronic Codebook) é expressamente proibido para proteger dados em repouso?</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">Exige chaves excessivamente grandes</button>
+        <button class="quiz-option" data-correct="true">Preserva padrões visíveis repetidos</button>
+        <button class="quiz-option" data-correct="false">Consome memória RAM desproporcional</button>
+        <button class="quiz-option" data-correct="false">Impede descriptografia futura dados</button>
+      </div>
+      <div class="quiz-feedback" id="quiz-feedback-aes"></div>
+    </section>
+
+    <section class="quiz-widget" id="quiz-gcm">
+      <p class="quiz-question">2. Qual é o papel fundamental da Authentication Tag gerada automaticamente pelo AES-GCM?</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">Aumentar velocidade transmissão dados</button>
+        <button class="quiz-option" data-correct="false">Armazenar senha original usuário</button>
+        <button class="quiz-option" data-correct="true">Garantir integridade e autenticidade</button>
+        <button class="quiz-option" data-correct="false">Comprimir tamanho texto criptografado</button>
+      </div>
+      <div class="quiz-feedback" id="quiz-feedback-gcm"></div>
+    </section>
+
+    <section class="card alert-success">
+      <h3>Fontes de Consulta Primárias</h3>
+      <ul>
+        <li><a href="../reference/02-dicionario-de-siglas.html">Referência: Dicionário Descomplicado de Siglas (AES, GCM, AEAD, IV)</a></li>
+        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP: Cryptographic Storage Cheat Sheet</a></li>
+        <li><a href="https://csrc.nist.gov/publications/detail/sp/800-38d/final" target="_blank" rel="noopener">NIST SP 800-38D: Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM)</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="nav-footer">
+    <a href="0002-anatomia-do-bcrypt-e-argon2.html">← Lição 0002: bcrypt & Argon2</a>
+    <span>Lembrete: Pergunte suas dúvidas de implementação para o seu assistente!</span>
+    <a href="../reference/02-dicionario-de-siglas.html">Dicionário de Siglas →</a>
+  </footer>
+
+  <script>
+    let activeKey = null;
+    let currentIv = null;
+    let currentCiphertextWithTag = null;
+
+    function buf2hex(buffer) {
+      return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
+    }
+
+    async function executeEncrypt() {
+      const text = document.getElementById('plaintext-input').value;
+      if (!text) return;
+
+      // 1. Gera chave AES-GCM 256 bits se ainda não existir
+      activeKey = await window.crypto.subtle.generateKey(
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"]
+      );
+
+      // 2. Gera IV aleatório de 12 bytes (96 bits) recomendado pelo NIST
+      currentIv = window.crypto.getRandomValues(new Uint8Array(12));
+
+      // 3. Criptografa usando Web Crypto API
+      const encoder = new TextEncoder();
+      const encodedData = encoder.encode(text);
+
+      const encryptedBuffer = await window.crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: currentIv, tagLength: 128 },
+        activeKey,
+        encodedData
+      );
+
+      // No Web Crypto, os últimos 16 bytes do encryptedBuffer são a Auth Tag
+      currentCiphertextWithTag = new Uint8Array(encryptedBuffer);
+      const tagOffset = currentCiphertextWithTag.length - 16;
+      const cipherBytes = currentCiphertextWithTag.slice(0, tagOffset);
+      const tagBytes = currentCiphertextWithTag.slice(tagOffset);
+
+      // Exibe na tela
+      document.getElementById('crypto-output').style.display = 'block';
+      document.getElementById('out-iv').innerText = buf2hex(currentIv);
+      document.getElementById('out-cipher').innerText = buf2hex(cipherBytes).slice(0, 36) + '... (' + cipherBytes.length + ' bytes)';
+      document.getElementById('out-tag').innerText = buf2hex(tagBytes);
+
+      document.getElementById('btn-decrypt').disabled = false;
+      document.getElementById('btn-tamper').disabled = false;
+
+      const status = document.getElementById('status-display');
+      status.style.display = 'block';
+      status.className = 'status-box status-ok';
+      status.innerHTML = '<strong>Dado criptografado com sucesso!</strong> IV gerado, texto cifrado e Auth Tag calculada.';
+    }
+
+    async function executeDecrypt(tamper) {
+      const status = document.getElementById('status-display');
+      status.style.display = 'block';
+
+      try {
+        let bufferToDecrypt = currentCiphertextWithTag.slice();
+
+        if (tamper) {
+          // Ataque: Inverte o primeiro byte do texto cifrado no banco
+          bufferToDecrypt[0] ^= 0xFF;
+        }
+
+        const decryptedBuffer = await window.crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: currentIv, tagLength: 128 },
+          activeKey,
+          bufferToDecrypt
+        );
+
+        const decoder = new TextDecoder();
+        const decryptedText = decoder.decode(decryptedBuffer);
+
+        status.className = 'status-box status-ok';
+        status.innerHTML = `<strong>Sucesso na Descriptografia!</strong><br>Conteúdo recuperado: <code>${decryptedText}</code><br><em>A Auth Tag bateu perfeitamente com os dados recebidos.</em>`;
+      } catch (err) {
+        status.className = 'status-box status-error';
+        status.innerHTML = `<strong>ALERTA DE SEGURANÇA: Descriptografia Rejeitada!</strong><br>O AES-GCM detectou que a Authentication Tag não confere com o Ciphertext (erro criptográfico: <code>${err.name}</code>).<br>Isso prova que até a alteração de 1 único bit impede que a aplicação leia dados corrompidos ou maliciosos.`;
+      }
+    }
+
+    // Configuração dos Quizzes
+    function setupQuiz(quizId, feedbackId, correctMsg, incorrectMsg) {
+      const container = document.getElementById(quizId);
+      const feedback = document.getElementById(feedbackId);
+      const buttons = container.querySelectorAll('.quiz-option');
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.correct === "true") b.classList.add('correct');
+          });
+
+          if (btn.dataset.correct === "true") {
+            feedback.style.display = 'block';
+            feedback.className = 'quiz-feedback alert-success';
+            feedback.innerHTML = `<strong>Correto!</strong> ${correctMsg}`;
+          } else {
+            btn.classList.add('incorrect');
+            feedback.style.display = 'block';
+            feedback.className = 'quiz-feedback alert-danger';
+            feedback.innerHTML = `<strong>Incorreto.</strong> ${incorrectMsg}`;
+          }
+        });
+      });
+    }
+
+    setupQuiz('quiz-aes', 'quiz-feedback-aes', 'No modo ECB, blocos iguais de texto plano sempre geram blocos cifrados idênticos, revelando a estrutura dos dados.', 'O ECB cifra cada bloco isoladamente sem difusão, mantendo os padrões repetidos visíveis.');
+    setupQuiz('quiz-gcm', 'quiz-feedback-gcm', 'A Auth Tag serve como um selo de inviolabilidade que valida se o texto cifrado foi adulterado antes de permitir sua leitura.', 'A principal função da tag de autenticação é verificar a integridade dos dados e impedir alterações maliciosas.');
+  </script>
+</body>
+</html>
