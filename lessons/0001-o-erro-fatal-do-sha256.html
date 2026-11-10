@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lição 0001: Por que o SHA-256 é um Erro Fatal para Senhas</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <span class="lesson-badge">Lição 0001 • Fundamentos de Hashing</span>
+    <h1>O Erro Fatal de Usar SHA-256 para Senhas</h1>
+    <p>Objetivo: Compreender a física computacional por trás de ataques de força bruta e por que seu backend precisa de funções lentas com custo de memória.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. A Falácia da "Criptografia de Senhas"</h2>
+      <p>Em entrevistas e apresentações acadêmicas, é muito comum ouvir: <em>"Nós criptografamos a senha do usuário com SHA-256 no banco de dados"</em>. Essa frase contém dois erros conceituais graves:</p>
+      
+      <div class="card alert-danger">
+        <p><strong>Erro 1:</strong> Hashing <strong>não é</strong> criptografia. Criptografia é bidirecional (você tem uma chave para ler o texto original de volta). Hashing é uma função matemática unidirecional: entra qualquer tamanho, sai um resumo fixo, e o caminho de volta é matematicamente impossível.</p>
+        <p><strong>Erro 2:</strong> O SHA-256 foi projetado pela NSA para ser <strong>o mais rápido possível</strong>. E velocidade é a pior coisa do mundo quando o assunto é proteger senhas.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>2. A Física do Ataque: CPUs vs. GPUs</h2>
+      <p>O algoritmo SHA-256 exige pouquíssima memória RAM e opera apenas com operações binárias simples (bitwise shifts, rotações e somas). Placas de vídeo modernas (GPUs como a RTX 4090) possuem milhares de núcleos simples projetados exatamente para esse tipo de cálculo.</p>
+      
+      <p>Uma única GPU comercial consegue testar mais de <strong>25 bilhões de hashes SHA-256 por segundo</strong>. Se um atacante obtiver o dump do seu banco de dados, senhas de 8 ou 9 caracteres caem em questão de minutos usando dicionários e rainbow tables.</p>
+
+      <div class="card alert-warning">
+        <h3>E por que o Sal (Salt) sozinho não resolve?</h3>
+        <p>O <strong>Salt</strong> (sequência aleatória gerada para cada usuário) impede que o atacante use tabelas pré-computadas (<em>Rainbow Tables</em>) contra todos os usuários de uma só vez. <strong>Porém</strong>, se a função for rápida (SHA-256), a força bruta individual ainda calculará bilhões de tentativas por segundo em cada conta!</p>
+      </div>
+    </section>
+
+    <!-- Simulador Interativo -->
+    <section class="simulator">
+      <div class="simulator-header">
+        <h2>Simulador Interativo: Tempo de Força Bruta</h2>
+        <span class="lesson-badge">Laboratório Prático</span>
+      </div>
+      <p>Compare o tempo necessário para quebrar uma senha testando 10 trilhões de combinações (espaço de busca comum para senhas alfanuméricas de 8 caracteres):</p>
+
+      <div class="simulator-controls">
+        <div class="form-group">
+          <label for="hardware-select">Poder de Ataque do Invasor:</label>
+          <select id="hardware-select">
+            <option value="1">1x Placa de Vídeo Moderna (RTX 4090)</option>
+            <option value="8">Rig com 8x GPUs RTX 4090</option>
+            <option value="64">Cluster Profissional (64 GPUs em Nuvem)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cost-factor">Fator de Custo bcrypt (Cost Factor):</label>
+          <select id="cost-factor">
+            <option value="10">Custo 10 (Mais rápido: ~100ms)</option>
+            <option value="12" selected>Custo 12 (Recomendado: ~300ms)</option>
+            <option value="14">Custo 14 (Servidores potentes: ~1.2s)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sim-output">
+        <div class="sim-metric">
+          <span>SHA-256 Puro (Sem Custo de Tempo):</span>
+          <strong id="sha-result" style="color: var(--danger)">Calculando...</strong>
+        </div>
+        <div class="sim-metric">
+          <span>bcrypt (Hash Lento por CPU):</span>
+          <strong id="bcrypt-result" style="color: var(--warning)">Calculando...</strong>
+        </div>
+        <div class="sim-metric">
+          <span>Argon2id (Memory-Hard: Consome RAM + CPU):</span>
+          <strong id="argon-result" style="color: var(--success)">Calculando...</strong>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>3. A Solução: KDFs (Key Derivation Functions)</h2>
+      <p>Para proteger senhas, utilizamos algoritmos com <strong>custo computacional configurável</strong>:</p>
+      <ul>
+        <li><strong>bcrypt</strong>: Introduziu o conceito de <em>work factor</em>. Cada incremento no custo dobra o tempo de cálculo por CPU (ex: 2<sup>12</sup> = 4.096 iterações).</li>
+        <li><strong>Argon2id</strong> (Vencedor da Password Hashing Competition): Além do tempo de CPU, exige <strong>memória RAM</strong> dedicada (ex: 64MB por cálculo). Como GPUs têm memória compartilhada limitada, o hardware do invasor fica rapidamente estrangulado e incapaz de paralelizar o ataque.</li>
+      </ul>
+    </section>
+
+    <!-- Quiz Interativo -->
+    <section class="quiz-widget" id="quiz-1">
+      <h2>Verificação Rápida de Domínio</h2>
+      <p class="quiz-question">1. Qual a razão técnica para jamais utilizar SHA-256 no armazenamento de senhas?</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">Algoritmo altamente vulnerável</button>
+        <button class="quiz-option" data-correct="true">Cálculo computacionalmente veloz</button>
+        <button class="quiz-option" data-correct="false">Criptografia puramente simétrica</button>
+        <button class="quiz-option" data-correct="false">Estrutura facilmente reversível</button>
+      </div>
+      <div class="quiz-feedback" id="quiz-feedback-1"></div>
+    </section>
+
+    <section class="quiz-widget" id="quiz-2">
+      <p class="quiz-question">2. Qual propriedade técnica diferencia o Argon2id do bcrypt contra ataques por hardware?</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">Custo temporal ajustável</button>
+        <button class="quiz-option" data-correct="false">Chave simétrica interna</button>
+        <button class="quiz-option" data-correct="true">Exigência intensiva memória</button>
+        <button class="quiz-option" data-correct="false">Geração randômica salt</button>
+      </div>
+      <div class="quiz-feedback" id="quiz-feedback-2"></div>
+    </section>
+
+    <section class="card alert-success">
+      <h3>Fontes Primárias Recomendadas</h3>
+      <p>Para aprofundar e citar nos slides do seminário:</p>
+      <ul>
+        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP Password Storage Cheat Sheet</a> — Veja os parâmetros oficiais recomendados para Argon2id e bcrypt.</li>
+        <li><a href="https://www.youtube.com/@YuriDev" target="_blank" rel="noopener">Canal YuriDev no YouTube</a> — Vídeos práticos demonstrando como senhas são quebradas e protegidas no ecossistema de desenvolvimento.</li>
+        <li><a href="../reference/01-hashing-vs-criptografia.html">Documento de Referência 01: Criptografia vs Hashing</a></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3>Dúvidas sobre esta lição?</h3>
+      <p>Eu sou o seu instrutor! Se algum ponto sobre salts, memory-hardness ou ataque por GPU não ficou 100% nítido, <strong>me pergunte no chat</strong> para consolidarmos o entendimento antes da próxima lição.</p>
+    </section>
+  </main>
+
+  <footer class="nav-footer">
+    <span>Lição 0001 Concluída</span>
+    <a href="../reference/01-hashing-vs-criptografia.html">Ver Tabela de Referência →</a>
+  </footer>
+
+  <script>
+    // Simulator Logic
+    const combinations = 10000000000000; // 10 trilhões
+    const hardwareSelect = document.getElementById('hardware-select');
+    const costFactorSelect = document.getElementById('cost-factor');
+
+    function updateSimulator() {
+      const gpus = parseInt(hardwareSelect.value, 10);
+      const cost = parseInt(costFactorSelect.value, 10);
+
+      // SHA-256: ~25 bilhões hashes/seg por RTX 4090
+      const shaSpeed = 25000000000 * gpus;
+      const shaSeconds = combinations / shaSpeed;
+      document.getElementById('sha-result').textContent = formatTime(shaSeconds);
+
+      // bcrypt: ~10.000 h/s em cost 10 para 1 GPU, divide por 2 a cada aumento de custo
+      const baseBcrypt = 10000 * Math.pow(2, 10 - cost) * gpus;
+      const bcryptSeconds = combinations / baseBcrypt;
+      document.getElementById('bcrypt-result').textContent = formatTime(bcryptSeconds);
+
+      // Argon2id: memória de GPU esgota, velocidade drasticamente menor (~500 h/s com 64MB)
+      const baseArgon = 500 * gpus;
+      const argonSeconds = combinations / baseArgon;
+      document.getElementById('argon-result').textContent = formatTime(argonSeconds);
+    }
+
+    function formatTime(sec) {
+      if (sec < 60) return `${sec.toFixed(1)} segundos (instantâneo)`;
+      if (sec < 3600) return `${(sec / 60).toFixed(1)} minutos`;
+      if (sec < 86400) return `${(sec / 3600).toFixed(1)} horas`;
+      if (sec < 31536000) return `${(sec / 86400).toFixed(1)} dias`;
+      const anos = sec / 31536000;
+      if (anos > 1000) return `${(anos / 1000).toFixed(1)} milênios (inviável)`;
+      return `${anos.toFixed(1)} anos`;
+    }
+
+    hardwareSelect.addEventListener('change', updateSimulator);
+    costFactorSelect.addEventListener('change', updateSimulator);
+    updateSimulator();
+
+    // Quiz Logic
+    function setupQuiz(quizId, feedbackId) {
+      const container = document.getElementById(quizId);
+      const feedback = document.getElementById(feedbackId);
+      const buttons = container.querySelectorAll('.quiz-option');
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.correct === "true") b.classList.add('correct');
+          });
+
+          if (btn.dataset.correct === "true") {
+            feedback.style.display = 'block';
+            feedback.className = 'quiz-feedback alert-success';
+            feedback.innerHTML = '<strong>Correto!</strong> O cálculo veloz permite testar bilhões de possibilidades por segundo em GPUs.';
+          } else {
+            btn.classList.add('incorrect');
+            feedback.style.display = 'block';
+            feedback.className = 'quiz-feedback alert-danger';
+            feedback.innerHTML = '<strong>Incorreto.</strong> O problema do SHA-256 para senhas é a sua velocidade extrema de processamento, facilitando força bruta.';
+          }
+        });
+      });
+    }
+
+    setupQuiz('quiz-1', 'quiz-feedback-1');
+
+    // Quiz 2 feedback override
+    const container2 = document.getElementById('quiz-2');
+    const feedback2 = document.getElementById('quiz-feedback-2');
+    const buttons2 = container2.querySelectorAll('.quiz-option');
+    buttons2.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons2.forEach(b => {
+          b.disabled = true;
+          if (b.dataset.correct === "true") b.classList.add('correct');
+        });
+        if (btn.dataset.correct === "true") {
+          feedback2.style.display = 'block';
+          feedback2.className = 'quiz-feedback alert-success';
+          feedback2.innerHTML = '<strong>Correto!</strong> O Argon2id força o consumo de memória RAM, inviabilizando a paralelização em placas de vídeo.';
+        } else {
+          btn.classList.add('incorrect');
+          feedback2.style.display = 'block';
+          feedback2.className = 'quiz-feedback alert-danger';
+          feedback2.innerHTML = '<strong>Incorreto.</strong> A grande inovação do Argon2id é ser memory-hard (exigir muita memória física por tentativa).';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

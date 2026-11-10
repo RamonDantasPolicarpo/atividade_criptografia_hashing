@@ -1,0 +1,290 @@
+/* Tufte-inspired clean modern stylesheet for interactive lessons */
+:root {
+  --bg: #0d1117;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --card-bg: #161b22;
+  --card-border: #30363d;
+  --accent: #58a6ff;
+  --accent-hover: #1f6feb;
+  --success: #2ea043;
+  --danger: #f85149;
+  --warning: #d29922;
+  --code-bg: #0b0e14;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff;
+    --text: #1f2328;
+    --text-muted: #656d76;
+    --card-bg: #f6f8fa;
+    --card-border: #d0d7de;
+    --accent: #0969da;
+    --accent-hover: #0550ae;
+    --success: #1a7f37;
+    --danger: #cf222e;
+    --warning: #9a6700;
+    --code-bg: #f6f8fa;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+  padding: 2.5rem 1.5rem;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+header {
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.lesson-badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: rgba(88, 166, 255, 0.1);
+  border: 1px solid rgba(88, 166, 255, 0.3);
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 1.45rem;
+  font-weight: 600;
+  margin: 2rem 0 1rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.5rem;
+}
+
+p {
+  margin-bottom: 1.1rem;
+}
+
+strong {
+  color: var(--text);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--code-bg);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  border: 1px solid var(--card-border);
+}
+
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1.25rem 0;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  border: none;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.alert-warning {
+  border-left: 4px solid var(--warning);
+  background: rgba(210, 153, 34, 0.08);
+}
+
+.alert-danger {
+  border-left: 4px solid var(--danger);
+  background: rgba(248, 81, 73, 0.08);
+}
+
+.alert-success {
+  border-left: 4px solid var(--success);
+  background: rgba(46, 160, 67, 0.08);
+}
+
+/* Interactive Simulator */
+.simulator {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+}
+
+.simulator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.simulator-controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 600px) {
+  .simulator-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: var(--text-muted);
+}
+
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.sim-output {
+  background: var(--code-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+.sim-metric {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px dashed var(--card-border);
+}
+
+.sim-metric:last-child {
+  border-bottom: none;
+}
+
+/* Interactive Quiz */
+.quiz-widget {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+}
+
+.quiz-question {
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.quiz-option {
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  background: var(--bg);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+.quiz-option:hover {
+  border-color: var(--accent);
+  background: rgba(88, 166, 255, 0.05);
+}
+
+.quiz-option.correct {
+  border-color: var(--success);
+  background: rgba(46, 160, 67, 0.15);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.quiz-option.incorrect {
+  border-color: var(--danger);
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--text);
+}
+
+.quiz-feedback {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  display: none;
+  font-size: 0.9rem;
+}
+
+.nav-footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--card-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
