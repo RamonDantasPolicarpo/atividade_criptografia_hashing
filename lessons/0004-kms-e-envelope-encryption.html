@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lição 0004: O Dilema da Chave, KMS e Envelope Encryption</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .envelope-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin: 2rem 0;
+    }
+    .flow-step {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.2rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      transition: border-color 0.2s ease;
+    }
+    .flow-step.active {
+      border-color: var(--accent);
+      background: rgba(88, 166, 255, 0.05);
+    }
+    .step-number {
+      background: var(--accent);
+      color: white;
+      font-weight: bold;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .step-content {
+      flex: 1;
+    }
+    .key-badge {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 0.3rem;
+    }
+    .badge-kek { background: #8957e5; color: white; }
+    .badge-dek { background: #2ea043; color: white; }
+    .badge-edek { background: #d29922; color: #0d1117; font-weight: bold; }
+
+    .interactive-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.7rem 1.4rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: background 0.15s ease;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .interactive-btn:hover {
+      background: var(--accent-hover);
+    }
+    .interactive-btn:disabled {
+      background: #30363d;
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .vault-box {
+      border: 2px dashed #8957e5;
+      background: rgba(137, 87, 229, 0.08);
+      border-radius: 8px;
+      padding: 1.2rem;
+      margin: 1.5rem 0;
+    }
+    .vault-box h3 {
+      color: #8957e5;
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="lesson-badge">Lição 0004 • Bloco 2: Proteção em Repouso</span>
+    <h1>O Dilema da Chave, KMS e Envelope Encryption</h1>
+    <p>Objetivo: Resolver o problema fundamental de onde armazenar chaves simétricas com segurança, compreendendo o papel do KMS e a arquitetura de Envelope Encryption (DEK vs. KEK).</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. O Dilema: Onde Guardamos a Chave Criptográfica?</h2>
+      <p>Na Lição 0003 você aprendeu a usar o AES-256-GCM para criptografar dados com uma chave de 256 bits. Mas isso cria o maior calcanhar de aquiles do desenvolvimento backend:</p>
+
+      <div class="card alert-danger">
+        <h3>❌ O Erro dos Iniciantes: A Chave no <code>.env</code> ou Código</h3>
+        <p>Muitos desenvolvedores salvam a chave no arquivo <code>.env</code> ou como variável de ambiente no servidor. Se o servidor for invadido (ex: vazamento de logs, RCE, dump de memória) ou um dev subir acidentalmente o arquivo para o GitHub, <strong>o invasor leva a chave mestra</strong> e decifra todo o banco de dados.</p>
+      </div>
+
+      <p>Para resolver isso de forma profissional, usamos serviços dedicados chamados <strong>KMS (Key Management Service)</strong>, como AWS KMS, Google Cloud KMS ou HashiCorp Vault.</p>
+    </section>
+
+    <section>
+      <h2>2. O que é um KMS e por que não criptografar tudo nele?</h2>
+      
+      <div class="vault-box">
+        <h3>🏛️ O Cofre Blindado (KMS)</h3>
+        <p>O KMS armazena a <strong>Chave Mestra (KEK - Key Encryption Key)</strong> dentro de módulos de segurança de hardware (HSM - Hardware Security Modules). <strong>A chave mestra NUNCA sai de dentro do KMS</strong>. Nem você nem os administradores conseguem exportar os bytes dela.</p>
+      </div>
+
+      <h3>O Problema de Chamar o KMS para Cada Dado:</h3>
+      <p>Se o KMS guarda a chave, por que o seu backend não manda cada CPF ou linha do banco de dados pela rede para o KMS criptografar?</p>
+      <ul>
+        <li><strong>Latência de Rede Inviável:</strong> Cada operação seria uma requisição HTTP externa (50ms a 200ms por registro). Salvar 1.000 clientes travaria a aplicação.</li>
+        <li><strong>Custo Financeiro Elevado:</strong> Provedores de nuvem cobram por cada chamada de API ao KMS.</li>
+        <li><strong>Limite de Tamanho:</strong> O KMS da AWS, por exemplo, rejeita criptografar dados maiores que 4 KB diretamente!</li>
+      </ul>
+      <p>A solução elegante adotada por todas as big techs é o padrão <strong>Envelope Encryption (Criptografia de Envelope)</strong>.</p>
+    </section>
+
+    <section>
+      <h2>3. A Arquitetura de Envelope Encryption: DEK vs. KEK</h2>
+      <p>Em vez de usar uma chave só, dividimos o trabalho em duas chaves com funções distintas:</p>
+
+      <div class="card">
+        <p><span class="key-badge badge-kek">KEK (Key Encryption Key)</span> <strong>Chave Mestra:</strong> Fica guardada eternamente dentro do KMS. Nunca sai de lá.</p>
+        <p><span class="key-badge badge-dek">DEK (Data Encryption Key)</span> <strong>Chave do Dado:</strong> Uma chave AES comum gerada para criptografar os dados locais rapidamente na memória do servidor.</p>
+        <p><span class="key-badge badge-edek">Encrypted DEK</span> <strong>DEK Cifrada (O Envelope):</strong> A DEK protegida pela KEK. Fica salva no banco junto com o dado cifrado.</p>
+      </div>
+
+      <p><strong>A analogia do mundo real:</strong> Você usa uma chave de metal (DEK) para trancar a porta da sua casa. Mas, para não deixar essa chave solta na rua, você coloca ela dentro de um cofre digital inviolável (KMS trancado com a KEK).</p>
+    </section>
+
+    <!-- Simulador Visual do Envelope -->
+    <section class="simulator">
+      <div class="simulator-header">
+        <h2>Simulador Interativo: Ciclo de Vida do Envelope Encryption</h2>
+        <span class="lesson-badge">Passo a Passo</span>
+      </div>
+      <p>Avance as etapas para ver como o Backend, o KMS e o Banco de Dados colaboram:</p>
+
+      <div class="envelope-flow">
+        <div class="flow-step" id="step-1">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <strong>Backend solicita nova chave ao KMS</strong>
+            <p>A API chama: <code>kms.generateDataKey(KeyId="minha-kek")</code>.</p>
+          </div>
+        </div>
+
+        <div class="flow-step" id="step-2">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <strong>KMS devolve a DEK em duas versões</strong>
+            <p>1. <span class="key-badge badge-dek">DEK em Texto Puro</span> (para a memória RAM temporária do backend).</p>
+            <p>2. <span class="key-badge badge-edek">DEK Cifrada com a KEK</span> (o envelope lacrado).</p>
+          </div>
+        </div>
+
+        <div class="flow-step" id="step-3">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <strong>Backend cifra o dado localmente (Ultra Rápido)</strong>
+            <p>O backend usa AES-256-GCM com a DEK limpa na memória em microssegundos.</p>
+            <p><strong>Imediatamente após a cifra:</strong> O backend destrói a DEK em texto puro da memória RAM!</p>
+          </div>
+        </div>
+
+        <div class="flow-step" id="step-4">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <strong>Gravação segura no Banco de Dados</strong>
+            <p>O que fica salvo na tabela: <code>Dado Cifrado + IV + Tag + DEK Cifrada</code>.</p>
+            <p><em>Mesmo que o banco inteiro vaze, ninguém consegue abrir a DEK sem permissão no KMS!</em></p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <button class="interactive-btn" id="btn-next-step" onclick="advanceStep()">Simular Próximo Passo do Fluxo</button>
+        <button class="interactive-btn btn-secondary" onclick="resetFlow()">Reiniciar Demonstração</button>
+      </div>
+
+      <div class="sim-output" id="flow-log" style="margin-top: 1rem;">
+        Pressione "Simular Próximo Passo do Fluxo" para iniciar a execução da arquitetura.
+      </div>
+    </section>
+
+    <!-- Quiz Interativo -->
+    <section class="quiz-widget" id="quiz-kms">
+      <h2>Verificação de Aprendizado</h2>
+      <p class="quiz-question">1. Qual é a principal garantia de segurança fornecida por um serviço de KMS (ex: AWS KMS / Vault)?</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">Acelera o tráfego HTTP da aplicação</button>
+        <button class="quiz-option" data-correct="true">Impede a exportação da chave mestra</button>
+        <button class="quiz-option" data-correct="false">Gera senhas seguras para os usuários</button>
+        <button class="quiz-option" data-correct="false">Elimina necessidade de banco de dados</button>
+      </div>
+      <div class="quiz-feedback" id="quiz-feedback-kms"></div>
+    </section>
+
+    <section class="quiz-widget" id="quiz-env">
+      <p class="quiz-question">2. Por que a arquitetura de Envelope Encryption utiliza duas chaves (DEK e KEK) em vez de apenas uma?</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-correct="false">Duplica a complexidade para o invasor</button>
+        <button class="quiz-option" data-correct="false">Permite que senhas sejam recuperadas</button>
+        <button class="quiz-option" data-correct="false">Exige confirmação por dois servidores</button>
+        <button class="quiz-option" data-correct="true">Une segurança máxima com performance local</button>
+      </div>
+      <div class="quiz-feedback" id="quiz-feedback-env"></div>
+    </section>
+
+    <section class="card alert-success">
+      <h3>Fontes de Consulta Primárias</h3>
+      <ul>
+        <li><a href="https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#enveloping" target="_blank" rel="noopener">AWS KMS Concepts: Envelope Encryption</a></li>
+        <li><a href="https://cheatsheetseries.owasp.org/cheatsheets/Key_Management_Cheat_Sheet.html" target="_blank" rel="noopener">OWASP: Key Management Cheat Sheet</a></li>
+        <li><a href="../reference/02-dicionario-de-siglas.html">Referência: Dicionário de Siglas (KMS, KEK, DEK, HSM)</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="nav-footer">
+    <a href="0003-dados-em-repouso-aes-gcm.html">← Lição 0003: AES-GCM</a>
+    <span>Lembrete: Faça suas perguntas para o assistente caso reste qualquer dúvida!</span>
+    <a href="../reference/02-dicionario-de-siglas.html">Dicionário de Siglas →</a>
+  </footer>
+
+  <script>
+    let currentStep = 0;
+    const logs = [
+      "Pronto para iniciar. Clique no botão para solicitar a chave.",
+      "PASSO 1: Backend envia requisição autenticada com IAM para o KMS solicitando uma DEK.",
+      "PASSO 2: KMS gera internamente a DEK (AES-256). Retorna a DEK pura em memória e a DEK cifrada com a Master Key.",
+      "PASSO 3: Backend cifra os dados sensíveis via AES-GCM localmente em < 1ms e APAGA a DEK pura da memória RAM.",
+      "PASSO 4: Banco recebe e persiste: [Texto Cifrado] + [IV] + [Auth Tag] + [DEK Cifrada]. Ciclo concluído com sucesso!"
+    ];
+
+    function advanceStep() {
+      if (currentStep < 4) {
+        currentStep++;
+        document.getElementById(`step-${currentStep}`).classList.add('active');
+        document.getElementById('flow-log').innerHTML = `<strong>${logs[currentStep]}</strong>`;
+        if (currentStep === 4) {
+          document.getElementById('btn-next-step').disabled = true;
+        }
+      }
+    }
+
+    function resetFlow() {
+      currentStep = 0;
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`step-${i}`).classList.remove('active');
+      }
+      document.getElementById('flow-log').innerText = logs[0];
+      document.getElementById('btn-next-step').disabled = false;
+    }
+
+    function setupQuiz(quizId, feedbackId, correctMsg, incorrectMsg) {
+      const container = document.getElementById(quizId);
+      const feedback = document.getElementById(feedbackId);
+      const buttons = container.querySelectorAll('.quiz-option');
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          buttons.forEach(b => {
+            b.disabled = true;
+            if (b.dataset.correct === "true") b.classList.add('correct');
+          });
+
+          if (btn.dataset.correct === "true") {
+            feedback.style.display = 'block';
+            feedback.className = 'quiz-feedback alert-success';
+            feedback.innerHTML = `<strong>Correto!</strong> ${correctMsg}`;
+          } else {
+            btn.classList.add('incorrect');
+            feedback.style.display = 'block';
+            feedback.className = 'quiz-feedback alert-danger';
+            feedback.innerHTML = `<strong>Incorreto.</strong> ${incorrectMsg}`;
+          }
+        });
+      });
+    }
+
+    setupQuiz('quiz-kms', 'quiz-feedback-kms', 'O KMS reside em hardware blindado (HSM) e nunca exporta os bytes em texto puro da Master Key (KEK).', 'A grande virtude do KMS é nunca expor ou permitir o download direto dos bytes da chave mestra.');
+    setupQuiz('quiz-env', 'quiz-feedback-env', 'O Envelope Encryption permite cifrar dados pesados em microssegundos localmente na CPU, enquanto o KMS protege apenas a pequena chave DEK.', 'O envelope combina a velocidade do AES local na memória com a segurança inviolável do KMS na nuvem.');
+  </script>
+</body>
+</html>
