@@ -6,8 +6,17 @@
 - **Estilo de Ensino & Apresentação**:
   - Preferência por explicações visuais e demonstrações interativas práticas em HTML/navegador.
   - Não quer vídeos gerados previamente (como Hyperframes); quer slides/componentes interativos onde os exemplos funcionem ao vivo.
-  - Valoriza referências práticas do ecossistema de desenvolvimento web/backend (ex: canal YuriDev).
-- **Tópicos Obrigatórios**:
-  1. Hashing seguro: bcrypt e Argon2 (diferença para hashes rápidos, salting, memory-hardness).
-  2. Proteção de dados em repouso (cifras simétricas, AES-GCM, gerenciamento de chaves).
-  3. Proteção de dados em trânsito (TLS 1.3, handshake, certificados).
+  - Valoriza referências práticas do ecossistema de desenvolvimento web/backend (ex: canal YuriRDev).
+- **Tópicos Obrigatórios & Status do Planejamento**:
+  1. **Bloco 1: Hashing Seguro (bcrypt & Argon2id)** [CONCLUÍDO]
+     - Lição 0001: O Erro Fatal do SHA-256 e Rainbow Tables.
+     - Lição 0002: Anatomia do bcrypt (limite 72 bytes) e Argon2id (memória m=64MB).
+     - Desmistificação do Salt (unicidade vs segredo) e mecânica de verificação.
+  2. **Bloco 2: Proteção de Dados em Repouso (Data at Rest)** [EM ANDAMENTO]
+     - Lição 0003: Criptografia Simétrica Reversível vs Hashing, o erro do ECB/CBC e o padrão ouro AES-256-GCM (AEAD).
+     - Próximo: Gerenciamento de Chaves (KMS & Envelope Encryption - DEK vs KEK).
+  3. **Bloco 3: Proteção de Dados em Trânsito (Data in Transit)** [A SEGUIR]
+     - TLS 1.3: Handshake otimizado (1-RTT) e cifras modernas.
+     - Certificados Digitais, CAs e mTLS (Mutual TLS) entre microsserviços.
+  4. **Bloco 4: Estrutura da Apresentação & Slides Interativos** [FINALIZAÇÃO]
+     - Roteiro de 20 min cronometrado (10 min por apresentador) com demonstrações ao vivo.
