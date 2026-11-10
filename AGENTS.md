@@ -17,3 +17,9 @@ Canonical triage roles mapping directly to standard labels. See `docs/agents/tri
 ### Domain docs
 
 Single-context repository layout (`GLOSSARY.md` and `docs/adr/`). See `docs/agents/domain.md`.
+
+## Diretrizes de Git & Versionamento
+
+- **Conventional Commits obrigatório:** Todas as alterações, novas lições, materiais de referência e registros de aprendizado devem ser commitados incrementalmente utilizando o padrão [Conventional Commits](https://www.conventionalcommits.org/) (ex.: `feat:`, `docs:`, `fix:`, `refactor:`, `chore:`).
+- **Push contínuo:** Após cada commit significativo ou ciclo de ensino/desenvolvimento concluído, realizar o push imediato para o repositório remoto no GitHub (`git push origin <branch>`).
+
