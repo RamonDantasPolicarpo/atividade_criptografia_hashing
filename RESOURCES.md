@@ -2,7 +2,7 @@
 
 ## Knowledge
 
-- [Vídeo: YuriDev - Criptografia na Prática](https://www.youtube.com/@YuriDev)
+- [Vídeo: YuriRDev - Criptografia na Prática](https://www.youtube.com/@YuriRDev)
   Excelente introdução visual e prática em português para desenvolvedores backend sobre segurança, senhas e criptografia. Use para: introduzir a intuição prática e exemplos reais do ecossistema.
 - [OWASP: Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html)
   Guia oficial e padrão da indústria para armazenamento seguro de senhas. Use para: parâmetros recomendados de bcrypt, Argon2id e scrypt.

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referência 02: Dicionário Descomplicado de Siglas Criptográficas</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .search-bar {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text);
+      font-size: 1rem;
+      margin: 1.5rem 0;
+    }
+    .grid-terms {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 650px) {
+      .grid-terms {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .term-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .term-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .term-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.5rem;
+    }
+    .term-tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(88, 166, 255, 0.15);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .term-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .term-meaning {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.65rem;
+      font-style: italic;
+    }
+    .term-desc {
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+    .term-why {
+      margin-top: 0.65rem;
+      padding-top: 0.65rem;
+      border-top: 1px dashed var(--card-border);
+      font-size: 0.85rem;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="lesson-badge">Documento de Referência 02</span>
+    <h1>Dicionário Descomplicado de Siglas</h1>
+    <p>Guia definitivo para dominar todos os termos e siglas que aparecem no seminário e no backend.</p>
+  </header>
+
+  <main>
+    <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Digite uma sigla ou termo (ex: KDF, AES, TLS, Salt, KMS)...">
+
+    <div class="grid-terms" id="termsContainer">
+
+      <!-- HASHING & SENHAS -->
+      <div class="term-card" data-category="hashing">
+        <div class="term-header">
+          <span class="term-title">KDF</span>
+          <span class="term-tag">Hashing</span>
+        </div>
+        <div class="term-meaning">Key Derivation Function (Função de Derivação de Chave)</div>
+        <p class="term-desc">Um algoritmo projetado para transformar uma senha em uma chave ou hash através de milhares de iterações matemáticas lentas.</p>
+        <div class="term-why"><strong>No Backend:</strong> É o que bcrypt, Argon2 e PBKDF2 são. Serve para impedir que computadores rápidos adivinhem senhas.</div>
+      </div>
+
+      <div class="term-card" data-category="hashing">
+        <div class="term-header">
+          <span class="term-title">SHA</span>
+          <span class="term-tag">Hashing</span>
+        </div>
+        <div class="term-meaning">Secure Hash Algorithm (Algoritmo de Hash Seguro)</div>
+        <p class="term-desc">Família de funções de hash (SHA-1, SHA-256, SHA-512, SHA-3) criada pelo NIST. É rápida e focada em integridade de arquivos e assinaturas digitais.</p>
+        <div class="term-why"><strong>No Backend:</strong> Excelente para verificar se um download não foi corrompido; <strong>nunca</strong> para guardar senhas.</div>
+      </div>
+
+      <div class="term-card" data-category="hashing">
+        <div class="term-header">
+          <span class="term-title">Argon2id</span>
+          <span class="term-tag">Hashing</span>
+        </div>
+        <div class="term-meaning">Argon2 Hybrid (Versão Híbrida do Argon2)</div>
+        <p class="term-desc">O algoritmo mais moderno e seguro da atualidade para senhas. É <em>memory-hard</em> (consome muita memória RAM) para travar placas de vídeo de atacantes.</p>
+        <div class="term-why"><strong>No Backend:</strong> O padrão ouro recomendado pela OWASP para novos projetos hoje.</div>
+      </div>
+
+      <div class="term-card" data-category="hashing">
+        <div class="term-header">
+          <span class="term-title">ASIC / GPU</span>
+          <span class="term-tag">Hardware / Ataque</span>
+        </div>
+        <div class="term-meaning">Application-Specific Integrated Circuit / Graphics Processing Unit</div>
+        <p class="term-desc">Hardware especializado com milhares de núcleos de processamento paralelos, frequentemente usado por cibercriminosos para tentar bilhões de senhas por segundo.</p>
+        <div class="term-why"><strong>No Backend:</strong> A razão pela qual criamos o Argon2 (que exige muita RAM, onde a GPU é fraca).</div>
+      </div>
+
+      <div class="term-card" data-category="hashing">
+        <div class="term-header">
+          <span class="term-title">HMAC</span>
+          <span class="term-tag">Hashing / Autenticação</span>
+        </div>
+        <div class="term-meaning">Hash-based Message Authentication Code</div>
+        <p class="term-desc">Um hash gerado em conjunto com uma chave secreta. Garante não só que a mensagem não mudou, mas que foi enviada por quem tem a chave.</p>
+        <div class="term-why"><strong>No Backend:</strong> A base que assina os tokens JWT que usamos em APIs REST.</div>
+      </div>
+
+      <!-- DADOS EM TRÂNSITO -->
+      <div class="term-card" data-category="transito">
+        <div class="term-header">
+          <span class="term-title">TLS</span>
+          <span class="term-tag">Trânsito</span>
+        </div>
+        <div class="term-meaning">Transport Layer Security (Segurança da Camada de Transporte)</div>
+        <p class="term-desc">O sucessor moderno do antigo SSL. É o protocolo criptográfico que transforma o HTTP inseguro no HTTPS seguro com cadeado verde.</p>
+        <div class="term-why"><strong>No Backend:</strong> Protege o tráfego contra invasores espionando Wi-Fi ou provedor (ataques Man-in-the-Middle).</div>
+      </div>
+
+      <div class="term-card" data-category="transito">
+        <div class="term-header">
+          <span class="term-title">mTLS</span>
+          <span class="term-tag">Trânsito</span>
+        </div>
+        <div class="term-meaning">Mutual Transport Layer Security (TLS Mútuo)</div>
+        <p class="term-desc">Enquanto o TLS normal só o servidor prova quem é, no mTLS o cliente também apresenta um certificado digital criptográfico para o servidor.</p>
+        <div class="term-why"><strong>No Backend:</strong> Muito usado para comunicação interna ultra segura entre microsserviços.</div>
+      </div>
+
+      <div class="term-card" data-category="transito">
+        <div class="term-header">
+          <span class="term-title">CA</span>
+          <span class="term-tag">Trânsito</span>
+        </div>
+        <div class="term-meaning">Certificate Authority (Autoridade Certificadora)</div>
+        <p class="term-desc">O "cartório" digital da internet (ex: Let's Encrypt, DigiCert) que emite e atesta que o certificado TLS pertence de fato ao seu domínio.</p>
+        <div class="term-why"><strong>No Backend:</strong> Sem uma CA confiável, os navegadores exibem tela vermelha de "Sua conexão não é particular".</div>
+      </div>
+
+      <div class="term-card" data-category="transito">
+        <div class="term-header">
+          <span class="term-title">MitM</span>
+          <span class="term-tag">Ataque</span>
+        </div>
+        <div class="term-meaning">Man-in-the-Middle (Homem no Meio)</div>
+        <p class="term-desc">Ataque em que um interceptador espiona ou altera mensagens transmitidas entre duas partes que acreditavam estar falando diretamente.</p>
+        <div class="term-why"><strong>No Backend:</strong> Totalmente neutralizado pelo uso correto de TLS 1.3 e certificados válidos.</div>
+      </div>
+
+      <!-- DADOS EM REPOUSO -->
+      <div class="term-card" data-category="repouso">
+        <div class="term-header">
+          <span class="term-title">AES-GCM</span>
+          <span class="term-tag">Repouso</span>
+        </div>
+        <div class="term-meaning">Advanced Encryption Standard - Galois/Counter Mode</div>
+        <p class="term-desc">O padrão mundial de cifra simétrica de dados. O modo GCM fornece criptografia com autenticação (AEAD), impedindo que dados cifrados sejam alterados sem detecção.</p>
+        <div class="term-why"><strong>No Backend:</strong> A cifra ideal para criptografar campos sensíveis no banco (CPF, cartão, prontuário).</div>
+      </div>
+
+      <div class="term-card" data-category="repouso">
+        <div class="term-header">
+          <span class="term-title">KMS</span>
+          <span class="term-tag">Repouso / Gestão</span>
+        </div>
+        <div class="term-meaning">Key Management Service (Serviço de Gestão de Chaves)</div>
+        <p class="term-desc">Serviço de nuvem ou cofre de segurança (AWS KMS, Google Cloud KMS, Vault) que guarda e gerencia as chaves mestras de criptografia em hardware blindado (HSM).</p>
+        <div class="term-why"><strong>No Backend:</strong> Impede o erro de desenvolvedor iniciante de commitar a chave de criptografia no GitHub ou no `.env`.</div>
+      </div>
+
+      <div class="term-card" data-category="repouso">
+        <div class="term-header">
+          <span class="term-title">IV / Nonce</span>
+          <span class="term-tag">Repouso</span>
+        </div>
+        <div class="term-meaning">Initialization Vector / Number used once</div>
+        <p class="term-desc">Um número aleatório de uso único gerado a cada nova criptografia AES. Garante que criptografar o mesmo dado duas vezes gere resultados visivelmente diferentes.</p>
+        <div class="term-why"><strong>No Backend:</strong> Sem IV único, um invasor consegue descobrir padrões estatísticos nos dados salvos.</div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="nav-footer">
+    <a href="../lessons/0001-o-erro-fatal-do-sha256.html">← Voltar para Lição 0001</a>
+    <a href="../lessons/0002-anatomia-do-bcrypt-e-argon2.html">Ir para Lição 0002 →</a>
+  </footer>
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const cards = document.querySelectorAll('.term-card');
+
+    searchInput.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase().trim();
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        if (text.includes(term)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
