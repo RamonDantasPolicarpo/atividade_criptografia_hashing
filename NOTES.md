@@ -18,5 +18,10 @@
   3. **Bloco 3: Proteção de Dados em Trânsito (Data in Transit)** [EM ANDAMENTO]
      - Lição 0005: TLS 1.3 - Handshake Otimizado (1-RTT/0-RTT) e Eliminação de Cifras Legadas. [ABERTA]
      - Lição 0006: Certificados Digitais, Autoridades Certificadoras (CAs) e mTLS entre Microsserviços. [PRÓXIMA E ÚLTIMA]
-  4. **Bloco 4: Estrutura da Apresentação & Slides Interativos** [FINALIZAÇÃO]
-     - Roteiro de 20 min cronometrado (10 min por apresentador) com demonstrações ao vivo.
+  4. **Bloco 4: Estrutura da Apresentação & Slides Interativos** [IMPLEMENTADO E PRONTO]
+     - Slide Deck criado em `index.html` com tema claro (ideal para projetores de sala de aula).
+     - Estilo Retro-Tech / Brutalist Pixelado com sombras duras, bordas nítidas e alta legibilidade.
+     - 4 Labs Práticos interativos embutidos diretamente nos slides (Web Crypto AES-GCM real, bcrypt salt visualizer, Envelope Encryption KMS, e corrida de Handshake TLS 1.3 vs 1.2).
+     - Cronômetro ao vivo de 20 minutos com pausa/início no cabeçalho.
+     - Divisão equilibrada de 10 min para Ramon (Slides 1 a 5) e 10 min para o Integrante 2 (Slides 6 a 10).
+     - Roteiro de fala embutido ("Speaker Notes") acionável pela tecla `N`.
