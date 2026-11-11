@@ -3,49 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Seminário: Criptografia Aplicada & Proteção de Dados no Backend</title>
-  
+  <title>Criptografia Aplicada e Proteção de Dados no Backend</title>
+  <!--
+    Design Read (antislop, modo durante)
+    Direção: tema claro para projetor de laboratório, pixelado leve (referência: Dead Cells), pedido pelo usuário.
+    Dials: ENERGY 2 / RHYTHM 2 / MOTION 2 (movimento só onde ensina: slide 07 e labs).
+    Motivo da grade de fundo: reforça a identidade pixelada pedida; é discreta (linhas a 35% de opacidade).
+    Motivo dos rótulos em monoespaço e maiúsculas: voz de "terminal/pixel" pedida, usada só em tags e títulos de lab.
+    Cores: base ardósia + off-white; azul e roxo identificam os dois blocos da apresentação (pedido do usuário);
+    verde/vermelho/âmbar só como estado (ok, risco, atenção); as cores do slide 08 vêm do próprio conteúdo (tintas).
+    Acento único de identidade: sombra sólida deslocada de 2 a 3px nos painéis.
+  -->
   <style>
-    /* ============================================================
-       DESIGN SYSTEM: REFINED INDIE-TECH / MODERN PIXEL (DEAD CELLS STYLE)
-       Paleta balanceada para projetores (slate/off-white),
-       bordas nítidas de 1.5px, sombras sólidas sutis (2px-3px),
-       aproveitamento total de tela, canvas animados e alta legibilidade.
-       ============================================================ */
     :root {
-      --bg: #f8fafc;
+      --bg: #f6f7f9;
       --surface: #ffffff;
-      --surface-subtle: #f1f5f9;
+      --surface-subtle: #eef1f5;
       --border-dark: #1e293b;
       --border-muted: #cbd5e1;
-      
+
       --text-main: #0f172a;
-      --text-muted: #475569;
-      --text-light: #64748b;
-      
+      --text-muted: #3f4b5f;
+      --text-light: #566074;
+
       --shadow-pixel: 3px 3px 0px rgba(30, 41, 59, 0.9);
       --shadow-pixel-sm: 2px 2px 0px rgba(30, 41, 59, 0.85);
-      
-      --track-a: #2563eb; /* Azul cobalto - Bloco 1 */
-      --track-b: #7c3aed; /* Púrpura índigo - Bloco 2 */
-      
-      --accent-emerald: #059669;
-      --accent-rose: #e11d48;
-      --accent-amber: #d97706;
-      
+
+      --track-a: #2563eb;
+      --track-b: #7c3aed;
+
+      --accent-emerald: #047857;
+      --accent-rose: #be123c;
+      --accent-amber: #b45309;
+
       --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
       --font-code: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Monaco, Consolas, monospace;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background-color: var(--bg);
-      background-image: 
+      background-image:
         linear-gradient(to right, rgba(203, 213, 225, 0.35) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(203, 213, 225, 0.35) 1px, transparent 1px);
       background-size: 20px 20px;
@@ -56,10 +55,17 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      user-select: none;
     }
 
-    /* Top Bar */
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: 0.5; }
+
+    :focus-visible {
+      outline: 3px solid #f59e0b;
+      outline-offset: 2px;
+    }
+
     header.deck-bar {
       height: 48px;
       background: var(--surface);
@@ -71,15 +77,11 @@
       z-index: 50;
     }
 
-    .brand-group {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
+    .brand-group { display: flex; align-items: center; gap: 0.75rem; }
 
     .pixel-tag {
       font-family: var(--font-code);
-      font-size: 0.74rem;
+      font-size: 0.78rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -89,7 +91,6 @@
       box-shadow: var(--shadow-pixel-sm);
     }
 
-    /* Discreet Track Box in the far right */
     .track-dot-corner {
       width: 14px;
       height: 14px;
@@ -98,41 +99,39 @@
       display: inline-block;
     }
 
-    /* Action Controls */
     .btn-stealth {
       font-family: var(--font-code);
-      font-size: 0.78rem;
+      font-size: 0.82rem;
       font-weight: 600;
-      padding: 0.3rem 0.65rem;
+      padding: 0.32rem 0.7rem;
       border: 1.5px solid var(--border-dark);
       background: var(--surface);
       box-shadow: var(--shadow-pixel-sm);
-      cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
-      transition: all 0.1s ease;
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
       color: var(--text-main);
     }
-
-    .btn-stealth:hover {
+    .btn-stealth:hover:not(:disabled) {
       background: var(--surface-subtle);
       transform: translate(-1px, -1px);
-      box-shadow: 2.5px 2.5px 0px rgba(30, 41, 59, 0.9);
+      box-shadow: 3px 3px 0px rgba(30, 41, 59, 0.9);
     }
-
-    .btn-stealth:active {
-      transform: translate(1px, 1px);
-      box-shadow: 0px 0px 0px transparent;
+    .btn-stealth:active:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 0 0 0 transparent;
     }
-
     .btn-stealth.primary {
-      background: #eff6ff;
+      background: #e8f0ff;
       border-color: var(--track-a);
-      color: var(--track-a);
+      color: #1d4ed8;
+    }
+    .btn-stealth.danger {
+      border-color: var(--accent-rose);
+      color: var(--accent-rose);
     }
 
-    /* Slide Stage: Maximum Screen Real Estate */
     main.deck-stage {
       flex: 1;
       position: relative;
@@ -152,186 +151,168 @@
       background: var(--surface);
       border: 2px solid var(--border-dark);
       box-shadow: var(--shadow-pixel);
-      padding: 1.75rem 2.25rem;
+      padding: 1.5rem 2.25rem;
       display: flex;
       flex-direction: column;
       opacity: 0;
+      visibility: hidden;
       pointer-events: none;
       transform: scale(0.985);
-      transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
       overflow-y: auto;
     }
-
     .slide.active {
       opacity: 1;
+      visibility: visible;
       pointer-events: all;
       transform: scale(1);
       z-index: 10;
+      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s;
     }
 
-    /* Slide Headers */
     .slide-topline {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      gap: 1rem;
       border-bottom: 1.5px solid var(--border-muted);
-      padding-bottom: 0.65rem;
-      margin-bottom: 1rem;
+      padding-bottom: 0.6rem;
+      margin-bottom: 0.9rem;
     }
-
     .slide-category {
       font-family: var(--font-code);
-      font-size: 0.74rem;
+      font-size: 0.78rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-light);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
       margin-bottom: 0.2rem;
     }
-
     .slide-title {
       font-size: 1.75rem;
       font-weight: 800;
       letter-spacing: -0.025em;
-      color: var(--text-main);
       line-height: 1.15;
     }
-
     .slide-content {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 0.85rem;
-      font-size: 0.95rem;
-      color: var(--text-main);
+      gap: 0.8rem;
+      font-size: 1rem;
     }
 
-    /* Structured Panels */
     .panel {
       background: var(--surface);
       border: 1.5px solid var(--border-dark);
       box-shadow: var(--shadow-pixel-sm);
-      padding: 1rem 1.15rem;
-      position: relative;
+      padding: 0.9rem 1.1rem;
     }
-
     .panel-subtle {
       background: var(--surface-subtle);
       border: 1.5px solid var(--border-muted);
-      padding: 0.85rem 1.1rem;
+      padding: 0.8rem 1.1rem;
     }
+    .panel-danger { background: #fff1f2; border-color: #e11d48; }
+    .panel-success { background: #ecfdf5; border-color: #10b981; }
+    .panel-warning { background: #fffbeb; border-color: #d97706; }
 
-    .panel-danger {
-      background: #fff5f5;
-      border-color: #fca5a5;
+    .panel h3 { font-size: 1.05rem; margin-bottom: 0.3rem; }
+    .panel p, .panel li { font-size: 0.95rem; line-height: 1.5; }
+    .panel .kicker {
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
     }
+    .muted { color: var(--text-muted); }
 
-    .panel-success {
-      background: #f0fdf4;
-      border-color: #86efac;
-    }
-
-    .panel-warning {
-      background: #fffbeb;
-      border-color: #fde68a;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 0.85rem;
-    }
-
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.75rem;
-    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.85rem; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
 
     .code-chip {
       font-family: var(--font-code);
       background: var(--surface-subtle);
       border: 1px solid var(--border-muted);
-      padding: 0.12rem 0.38rem;
-      font-size: 0.86em;
+      padding: 0.1rem 0.38rem;
+      font-size: 0.88em;
       font-weight: 600;
-      border-radius: 2px;
     }
 
-    /* Embedded Labs */
     .lab-box {
-      background: #fafaf9;
+      background: #fbfbfa;
       border: 1.5px dashed var(--border-dark);
-      padding: 1rem;
-      margin-top: 0.25rem;
+      padding: 0.95rem 1rem;
     }
-
     .lab-heading {
       font-family: var(--font-code);
-      font-size: 0.76rem;
+      font-size: 0.8rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       color: var(--text-muted);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.55rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
     }
-
+    .lab-row { display: flex; gap: 0.5rem; margin-bottom: 0.55rem; flex-wrap: wrap; }
     .lab-input-clean {
+      flex: 1;
+      min-width: 220px;
       font-family: var(--font-code);
-      font-size: 0.88rem;
+      font-size: 0.92rem;
       padding: 0.4rem 0.65rem;
       border: 1.5px solid var(--border-dark);
       background: #fff;
-      width: 100%;
+      color: var(--text-main);
     }
-
     .lab-output-frame {
       background: #ffffff;
       border: 1.5px solid var(--border-dark);
-      padding: 0.65rem 0.9rem;
+      padding: 0.7rem 0.9rem;
       font-family: var(--font-code);
-      font-size: 0.86rem;
+      font-size: 0.9rem;
       line-height: 1.55;
+      overflow-wrap: anywhere;
     }
 
-    /* Segmented Hash Dissection Display */
     .segment-bar {
       display: flex;
       flex-wrap: wrap;
       gap: 0.3rem;
       align-items: center;
-      margin: 0.4rem 0;
+      margin: 0.35rem 0 0.5rem;
       font-family: var(--font-code);
-      font-size: 0.92rem;
+      font-size: 0.95rem;
     }
-
     .seg {
       padding: 0.2rem 0.45rem;
       border: 1.5px solid var(--border-dark);
       font-weight: 700;
       display: inline-block;
+      overflow-wrap: anywhere;
     }
-
     .seg-algo { background: #bbf7d0; color: #14532d; }
     .seg-cost { background: #bfdbfe; color: #1e3a8a; }
-    .seg-salt { background: #fef08a; color: #713f12; }
+    .seg-salt { background: #fde68a; color: #713f12; }
     .seg-hash { background: #e9d5ff; color: #581c87; }
     .seg-tag  { background: #fed7aa; color: #7c2d12; }
-    .seg-iv   { background: #fef08a; color: #713f12; }
+    .seg-iv   { background: #fde68a; color: #713f12; }
 
-    /* Footer Navigation */
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 0.35rem 1rem;
+      font-family: var(--font-ui);
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+    .legend .seg { font-size: 0.78rem; padding: 0.05rem 0.35rem; margin-right: 0.35rem; }
+
     footer.deck-footer {
       height: 44px;
       background: var(--surface);
@@ -342,855 +323,815 @@
       padding: 0 1.5rem;
       z-index: 50;
     }
-
-    .footer-progress {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
+    .footer-progress { display: flex; align-items: center; gap: 1rem; }
     .progress-track {
       width: 200px;
       height: 6px;
       background: #e2e8f0;
       border: 1px solid var(--border-dark);
     }
-
     .progress-fill {
       height: 100%;
       background: var(--track-a);
       width: 10%;
       transition: width 0.2s ease, background 0.2s ease;
     }
-
     .subtle-hint {
       font-family: var(--font-code);
-      font-size: 0.72rem;
+      font-size: 0.74rem;
       color: var(--text-light);
     }
 
-    /* Canvas styling */
     canvas.interactive-canvas {
       background: #ffffff;
       border: 1.5px solid var(--border-dark);
       display: block;
       width: 100%;
+    }
+    svg.static-diagram {
+      display: block;
+      width: 100%;
       height: auto;
+      max-height: 47vh;
+      background: #ffffff;
+      border: 1.5px solid var(--border-dark);
+    }
+    .tux-grid {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      gap: 1rem;
+      background: #fff;
+      border: 1.5px solid var(--border-dark);
+      padding: 0.6rem;
+    }
+    .tux-cell { text-align: center; font-family: var(--font-code); font-size: 0.82rem; font-weight: 700; }
+    .tux-cell canvas {
+      width: 168px;
+      height: 168px;
+      image-rendering: pixelated;
+      border: 1px solid var(--border-muted);
+      display: block;
+      margin: 0 auto 0.25rem;
+    }
+
+    @media (max-width: 820px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .slide { padding: 1rem; }
+      .slide-title { font-size: 1.35rem; }
+      .progress-track { width: 90px; }
+      .subtle-hint { display: none; }
+      .brand-group span:last-child { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .slide, .slide.active, .progress-fill, .btn-stealth { transition: none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Bar -->
   <header class="deck-bar">
     <div class="brand-group">
-      <span class="pixel-tag">CEUB • DESENVOLVIMENTO BACKEND</span>
-      <span style="font-weight: 700; font-size: 0.88rem; letter-spacing: -0.01em;">Criptografia Aplicada & Proteção de Dados</span>
+      <span class="pixel-tag">CEUB • Desenvolvimento Backend</span>
+      <span style="font-weight: 700; font-size: 0.9rem;">Criptografia Aplicada e Proteção de Dados</span>
     </div>
-
-    <!-- Far right: subtle square indicator + fullscreen -->
     <div style="display:flex; align-items:center; gap:0.75rem;">
-      <span class="track-dot-corner" id="track-corner" style="background: var(--track-a);" title="Identificador de Bloco"></span>
-      <button class="btn-stealth" onclick="toggleFullscreen()" title="Alternar tela cheia">
-        ⛶ Tela Cheia
-      </button>
+      <span class="track-dot-corner" id="track-corner" style="background: var(--track-a);" role="img" aria-label="Identificador de bloco"></span>
+      <button class="btn-stealth" onclick="toggleFullscreen()">Tela cheia</button>
     </div>
   </header>
 
-  <!-- Slide Stage -->
   <main class="deck-stage">
 
-    <!-- ==========================================
-         SLIDE 1: ABERTURA DO SEMINÁRIO
-         ========================================== -->
-    <section class="slide active" id="slide-1" data-track="A">
+    <!-- SLIDE 1 -->
+    <section class="slide active" id="slide-1" data-track="A" aria-label="Slide 1 de 10">
       <div class="slide-topline">
         <div>
-          <div class="slide-category">01 / 10 • Introdução & Estrutura</div>
-          <h1 class="slide-title">Criptografia Aplicada & Proteção de Dados no Backend</h1>
+          <div class="slide-category">01 / 10 • Introdução</div>
+          <h1 class="slide-title">Criptografia Aplicada e Proteção de Dados no Backend</h1>
         </div>
-        <span class="pixel-tag">4º SEMESTRE</span>
+        <span class="pixel-tag">4º semestre</span>
       </div>
 
       <div class="slide-content">
         <div class="panel-subtle" style="border-left: 4px solid var(--border-dark);">
-          <p style="font-size: 1.05rem; font-weight: 600; color: var(--text-main);">
-            Arquitetura de Segurança de Dados: Hashing Seguro, Criptografia em Repouso e Proteção em Trânsito.
+          <p style="font-size: 1.1rem; font-weight: 600;">
+            Três frentes de proteção: senhas (hashing), dados guardados (repouso) e dados na rede (trânsito).
           </p>
-          <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">
-            Diretrizes técnicas comparativas em nível de engenharia fundamentadas nos padrões da OWASP (Open Web Application Security Project), NIST e RFCs do IETF.
+          <p class="muted" style="font-size: 0.95rem; margin-top: 0.2rem;">
+            Referências: OWASP (Open Web Application Security Project), NIST (National Institute of Standards and Technology) e RFCs do IETF (Internet Engineering Task Force).
           </p>
         </div>
 
-        <div class="grid-3" style="margin-top: 0.25rem;">
+        <div class="grid-3">
           <div class="panel">
-            <div style="font-family:var(--font-code); font-size:0.75rem; font-weight:700; color:var(--track-a); margin-bottom:0.3rem;">
-              PILAR 01
-            </div>
-            <h3 style="font-size:1rem; margin-bottom:0.35rem;">Hashing de Senhas</h3>
-            <p style="font-size:0.86rem; color:var(--text-muted);">
-              A inadequação matemática de funções rápidas (SHA-256), a mecânica do <strong>Salt</strong> para garantia de unicidade e algoritmos com atrito de memória (Argon2id) e CPU (bcrypt).
-            </p>
+            <div class="kicker" style="color:var(--track-a);">PILAR 01</div>
+            <h3>Hashing de senhas</h3>
+            <p class="muted">Por que o SHA-256 não serve para senhas, o que o Salt faz de verdade e como bcrypt e Argon2id travam o atacante.</p>
           </div>
-
           <div class="panel">
-            <div style="font-family:var(--font-code); font-size:0.75rem; font-weight:700; color:var(--track-a); margin-bottom:0.3rem;">
-              PILAR 02
-            </div>
-            <h3 style="font-size:1rem; margin-bottom:0.35rem;">Dados em Repouso</h3>
-            <p style="font-size:0.86rem; color:var(--text-muted);">
-              Criptografia autenticada reversível (<strong>AES-256-GCM</strong>), a fragilidade estrutural do modo ECB e gerenciamento seguro de chaves com <strong>Envelope Encryption via KMS</strong>.
-            </p>
+            <div class="kicker" style="color:var(--track-a);">PILAR 02</div>
+            <h3>Dados em repouso</h3>
+            <p class="muted">Cifra reversível com AES-256-GCM, o defeito do modo ECB e a guarda das chaves com Envelope Encryption e KMS.</p>
           </div>
-
           <div class="panel">
-            <div style="font-family:var(--font-code); font-size:0.75rem; font-weight:700; color:var(--track-b); margin-bottom:0.3rem;">
-              PILAR 03
-            </div>
-            <h3 style="font-size:1rem; margin-bottom:0.35rem;">Dados em Trânsito</h3>
-            <p style="font-size:0.86rem; color:var(--text-muted);">
-              O protocolo <strong>TLS 1.3</strong> com handshake de 1-RTT, a troca de chaves efêmeras via <strong>Diffie-Hellman</strong> sem tráfego do segredo e autenticação mútua rigorosa com <strong>mTLS</strong>.
-            </p>
+            <div class="kicker" style="color:var(--track-b);">PILAR 03</div>
+            <h3>Dados em trânsito</h3>
+            <p class="muted">TLS 1.3 com handshake de 1-RTT, troca de chaves Diffie-Hellman e autenticação dos dois lados com mTLS.</p>
           </div>
         </div>
 
-        <div class="panel-subtle" style="display:flex; justify-content:space-between; align-items:center; font-size:0.86rem;">
-          <span><strong>Metodologia Prática:</strong> Conceituação arquitetural com demonstrações em tempo real executadas no navegador.</span>
-          <span class="pixel-tag" style="background:#fff;">CEUB 2024</span>
+        <div class="panel-subtle">
+          <strong>Como vamos apresentar:</strong> cada conceito vem acompanhado de uma demonstração que roda ao vivo no navegador.
         </div>
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 2: HASHING VS CRIPTOGRAFIA & TEMPO DE GPU
-         ========================================== -->
-    <section class="slide" id="slide-2" data-track="A">
+    <!-- SLIDE 2 -->
+    <section class="slide" id="slide-2" data-track="A" aria-label="Slide 2 de 10">
       <div class="slide-topline">
         <div>
-          <div class="slide-category">Pilar 01: Armazenamento de Credenciais • 02 / 10</div>
-          <h2 class="slide-title">Hashing Unidirecional vs. Criptografia Simétrica</h2>
+          <div class="slide-category">Pilar 01: Senhas • 02 / 10</div>
+          <h2 class="slide-title">Hash de sentido único e criptografia reversível</h2>
         </div>
-        <span class="pixel-tag">FUNDAMENTOS</span>
+        <span class="pixel-tag">Fundamentos</span>
       </div>
 
       <div class="slide-content">
         <div class="grid-2">
           <div class="panel">
-            <div style="font-family:var(--font-code); font-size:0.75rem; font-weight:700; color:var(--track-a); margin-bottom:0.25rem;">
-              OPERACIONALIDADE REVERSÍVEL
-            </div>
-            <h3 style="font-size:1.05rem; margin-bottom:0.35rem;">Criptografia Simétrica (AES)</h3>
-            <p style="font-size:0.88rem; margin-bottom:0.4rem;">
-              Processo <strong>bidirecional</strong>. Utiliza uma chave para cifrar e a mesma chave para recuperar o dado em texto puro original.
-            </p>
-            <p style="font-size:0.82rem; color:var(--text-muted);">
-              <strong>Aplicação:</strong> Dados que o backend necessita recuperar (CPFs, números de cartão, prontuários de saúde).
-            </p>
+            <div class="kicker" style="color:var(--track-a);">REVERSÍVEL</div>
+            <h3>Criptografia simétrica (AES)</h3>
+            <p>Uma chave cifra e a mesma chave decifra. O dado original volta.</p>
+            <p class="muted">Uso: dados que o sistema precisa ler de novo, como CPF, cartão e prontuário.</p>
           </div>
-
           <div class="panel">
-            <div style="font-family:var(--font-code); font-size:0.75rem; font-weight:700; color:var(--accent-emerald); margin-bottom:0.25rem;">
-              FUNÇÃO MATEMÁTICA DE SENTIDO ÚNICO
-            </div>
-            <h3 style="font-size:1.05rem; margin-bottom:0.35rem;">Função de Hashing (KDF)</h3>
-            <p style="font-size:0.88rem; margin-bottom:0.4rem;">
-              Processo <strong>unidirecional</strong> (KDF - <em>Key Derivation Function</em>). Transforma entradas em um digest irreversível.
-            </p>
-            <p style="font-size:0.82rem; color:var(--text-muted);">
-              <strong>Aplicação:</strong> Senhas de usuários. O backend valida a igualdade do hash sem nunca necessitar ler a senha limpa.
-            </p>
+            <div class="kicker" style="color:var(--accent-emerald);">SENTIDO ÚNICO</div>
+            <h3>Hash (KDF: Key Derivation Function)</h3>
+            <p>Transforma a senha em um valor que não volta ao original.</p>
+            <p class="muted">Uso: senhas. O sistema compara hashes e nunca precisa conhecer a senha em texto puro.</p>
           </div>
         </div>
 
-        <!-- CARDS DE COMPARAÇÃO DE ATAQUE POR GPU -->
         <div>
-          <div style="font-family:var(--font-code); font-size:0.76rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.4rem;">
-            VULNERABILIDADE A ATAQUES PARALELOS: BENCHMARK EM GPU MODERNA (RTX 4090)
-          </div>
-          
+          <div class="lab-heading" style="margin-bottom:0.4rem;">Tempo para testar todas as senhas de 8 caracteres alfanuméricos em 1 GPU RTX 4090</div>
           <div class="grid-4">
             <div class="panel panel-danger">
-              <strong style="color:var(--accent-rose); font-size:0.85rem; display:block;">MD5 / NTLM</strong>
-              <div style="font-family:var(--font-code); font-size:0.8rem; margin:0.25rem 0; font-weight:bold;">160 Bilhões / s</div>
-              <p style="font-size:0.78rem; color:var(--text-muted);">
-                Quebra de senha de 8 caracteres: <strong>&lt; 1 segundo</strong> (Instantâneo).
-              </p>
+              <strong style="color:var(--accent-rose);">MD5</strong>
+              <div style="font-family:var(--font-code); font-weight:700; margin:0.25rem 0;">~164 bilhões/s</div>
+              <p>Tempo total: <strong>~22 minutos</strong></p>
             </div>
-
             <div class="panel panel-danger">
-              <strong style="color:var(--accent-rose); font-size:0.85rem; display:block;">SHA-256 Puro</strong>
-              <div style="font-family:var(--font-code); font-size:0.8rem; margin:0.25rem 0; font-weight:bold;">8,5 Bilhões / s</div>
-              <p style="font-size:0.78rem; color:var(--text-muted);">
-                Quebra de 8 caracteres alfanuméricos: <strong>~12 minutos</strong> (Inseguro).
-              </p>
+              <strong style="color:var(--accent-rose);">SHA-256</strong>
+              <div style="font-family:var(--font-code); font-weight:700; margin:0.25rem 0;">~21,5 bilhões/s</div>
+              <p>Tempo total: <strong>~2,8 horas</strong></p>
             </div>
-
             <div class="panel panel-success">
-              <strong style="color:var(--accent-emerald); font-size:0.85rem; display:block;">bcrypt (Custo 12)</strong>
-              <div style="font-family:var(--font-code); font-size:0.8rem; margin:0.25rem 0; font-weight:bold;">~2.000 Hashes / s</div>
-              <p style="font-size:0.78rem; color:var(--text-muted);">
-                Atrito forçado de CPU: <strong>Mais de 12 anos</strong> para quebra massiva.
-              </p>
+              <strong style="color:var(--accent-emerald);">bcrypt, custo 12</strong>
+              <div style="font-family:var(--font-code); font-weight:700; margin:0.25rem 0;">~1.700/s</div>
+              <p>Tempo total: <strong>~4.100 anos</strong></p>
             </div>
-
             <div class="panel panel-success">
-              <strong style="color:var(--accent-emerald); font-size:0.85rem; display:block;">Argon2id (m=64MB)</strong>
-              <div style="font-family:var(--font-code); font-size:0.8rem; margin:0.25rem 0; font-weight:bold;">~15 Hashes / s</div>
-              <p style="font-size:0.78rem; color:var(--text-muted);">
-                Esgota a VRAM da GPU: <strong>Mais de 1.800 anos</strong> de esforço computacional.
-              </p>
+              <strong style="color:var(--accent-emerald);">Argon2id, 64 MiB</strong>
+              <div style="font-family:var(--font-code); font-weight:700; margin:0.25rem 0;">máx. 384 em paralelo</div>
+              <p>24 GB de VRAM ÷ 64 MiB por tentativa</p>
             </div>
           </div>
+          <p class="muted" style="font-size:0.82rem; margin-top:0.4rem;">
+            Cálculo sobre 62<sup>8</sup> ≈ 2,2 × 10<sup>14</sup> combinações. Taxas aproximadas dos benchmarks públicos do hashcat (hashcat.net) para a RTX 4090; o bcrypt de custo 12 é a taxa do custo 5 dividida por 128. Não há benchmark comparável de Argon2id em GPU, por isso o limite mostrado é o de memória.
+          </p>
         </div>
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 3: BCRYPT, ARGON2ID E GERADOR EM TEMPO REAL
-         ========================================== -->
-    <section class="slide" id="slide-3" data-track="A">
+    <!-- SLIDE 3 -->
+    <section class="slide" id="slide-3" data-track="A" aria-label="Slide 3 de 10">
       <div class="slide-topline">
         <div>
-          <div class="slide-category">Pilar 01: Armazenamento de Credenciais • 03 / 10</div>
-          <h2 class="slide-title">Mecanismos com Atrito: bcrypt e Argon2id</h2>
+          <div class="slide-category">Pilar 01: Senhas • 03 / 10</div>
+          <h2 class="slide-title">bcrypt e Argon2id: lentos de propósito</h2>
         </div>
-        <span class="pixel-tag">DEMO DINÂMICA</span>
+        <span class="pixel-tag">Demo ao vivo</span>
       </div>
 
       <div class="slide-content">
         <div class="grid-2">
           <div class="panel">
-            <h3 style="font-size:0.98rem; margin-bottom:0.3rem;">bcrypt (Custo Exponencial de CPU)</h3>
-            <p style="font-size:0.85rem; color:var(--text-muted);">
-              Algoritmo adaptativo. O custo <code class="code-chip">12</code> representa 2<sup>12</sup> = 4.096 iterações de chave.
-              <em>Atenção no design backend:</em> o bcrypt trunca silenciosamente senhas além do 72º byte.
-            </p>
+            <h3>bcrypt: custo de CPU</h3>
+            <p class="muted">Custo <span class="code-chip">12</span> significa 2<sup>12</sup> = 4.096 rodadas. Limite conhecido: ignora tudo depois do 72º byte da senha.</p>
           </div>
-
           <div class="panel">
-            <h3 style="font-size:0.98rem; margin-bottom:0.3rem;">Argon2id (Resistência por Memória RAM)</h3>
-            <p style="font-size:0.85rem; color:var(--text-muted);">
-              Padrão RFC 9106 e recomendação oficial da OWASP. Exige obrigatoriamente 64 MB de memória RAM por cálculo (<code class="code-chip">m=65536</code>), tornando inviável o paralelismo massivo de GPUs.
-            </p>
+            <h3>Argon2id: custo de memória</h3>
+            <p class="muted">Perfil da RFC 9106: <span class="code-chip">m=65536</span> (64 MiB), <span class="code-chip">t=3</span> passadas, <span class="code-chip">p=4</span> lanes. Cada tentativa ocupa 64 MiB.</p>
           </div>
         </div>
 
-        <!-- LAB 1: GERADOR DINÂMICO DE HASH EM TEMPO REAL -->
         <div class="lab-box">
           <div class="lab-heading">
-            <span>MOTOR DE DEMONSTRAÇÃO: GERAÇÃO DE SALT E DISSECAÇÃO EM TEMPO REAL</span>
-            <span id="hash-runtime" style="color:var(--track-a); font-weight:bold;">Clique para testar</span>
+            <span>Motor real (bcrypt e Argon2id em WebAssembly)</span>
+            <span id="hash-runtime" style="color:#1d4ed8;">Aguardando</span>
           </div>
-
-          <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
-            <input type="text" class="lab-input-clean" id="lab1-input" value="MinhaSenhaForte@2024">
-            <button class="btn-stealth primary" onclick="generateDynamicBcrypt()">Gerar bcrypt</button>
-            <button class="btn-stealth" onclick="generateDynamicArgon()">Gerar Argon2id</button>
+          <div class="lab-row">
+            <input type="text" class="lab-input-clean" id="lab1-input" value="MinhaSenhaForte@2026" aria-label="Senha para gerar o hash">
+            <button class="btn-stealth primary" id="btn-bcrypt" onclick="generateHash('bcrypt')">Gerar bcrypt</button>
+            <button class="btn-stealth primary" id="btn-argon" onclick="generateHash('argon2id')">Gerar Argon2id</button>
+            <button class="btn-stealth" id="btn-verify" onclick="verifyHash()" disabled>Verificar senha digitada</button>
           </div>
-
-          <div class="lab-output-frame" id="lab1-output">
-            Pressione os botões acima para ver salts aleatórios e digests sendo gerados e dissecados na hora.
+          <div class="lab-output-frame" id="lab1-output" aria-live="polite">
+            Clique em um dos botões. Cada clique sorteia um salt novo e calcula o hash de verdade, então a mesma senha gera textos diferentes.
           </div>
-        </div>
-
-        <div class="panel-subtle" style="font-size:0.84rem; color:var(--text-muted);">
-          <strong>O que é o Salt?</strong> Sequência aleatória gerada a cada cadastro. O Salt <strong>não é um segredo</strong> e fica salvo abertamente na própria string do banco. 
-          Sua função é garantir que dois usuários com a mesma senha possuam hashes completamente distintos, neutralizando Rainbow Tables globais.
         </div>
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 4: DADOS EM REPOUSO & O PINGUIM DO ECB
-         ========================================== -->
-    <section class="slide" id="slide-4" data-track="A">
+    <!-- SLIDE 4 -->
+    <section class="slide" id="slide-4" data-track="A" aria-label="Slide 4 de 10">
       <div class="slide-topline">
         <div>
-          <div class="slide-category">Pilar 02: Proteção em Repouso • 04 / 10</div>
-          <h2 class="slide-title">Proteção em Repouso & A Falha Estrutural do Modo ECB</h2>
+          <div class="slide-category">Pilar 02: Repouso • 04 / 10</div>
+          <h2 class="slide-title">Dados em repouso e a falha do modo ECB</h2>
         </div>
-        <span class="pixel-tag">ANÁLISE DE MODOS</span>
+        <span class="pixel-tag">Modos do AES</span>
       </div>
 
       <div class="slide-content">
-        <p style="font-size:0.9rem; color:var(--text-muted);">
-          O padrão <strong>AES (Advanced Encryption Standard)</strong> opera em blocos atômicos de 16 bytes (128 bits). O <strong>Modo de Operação</strong> determina como os blocos da mensagem são interligados:
+        <p class="muted">
+          O <strong>AES (Advanced Encryption Standard)</strong> cifra blocos de 16 bytes (128 bits). O <strong>modo de operação</strong> define como os blocos de uma mensagem longa se relacionam.
         </p>
 
         <div class="grid-2">
           <div class="panel panel-danger">
-            <h3 style="color:var(--accent-rose); font-size:1rem; margin-bottom:0.3rem;">
-              ECB (Electronic Codebook) - Inseguro e Proibido
-            </h3>
-            <p style="font-size:0.86rem; margin-bottom:0.4rem;">
-              Cifra cada bloco de 16 bytes de forma isolada com a mesma chave. Blocos idênticos de texto plano geram blocos cifrados idênticos no banco de dados.
-            </p>
-            <p style="font-size:0.8rem; color:var(--text-muted);">
-              <strong>Risco Real:</strong> Revela repetições de padrões, tipos de arquivos e valores duplicados de registros bancários ou cadastros.
-            </p>
+            <h3 style="color:var(--accent-rose);">ECB (Electronic Codebook): proibido</h3>
+            <p>Cifra cada bloco sozinho com a mesma chave. Blocos iguais no texto original viram blocos iguais no banco.</p>
+            <p class="muted">Efeito: o atacante vê repetições e a estrutura do dado sem ter a chave.</p>
           </div>
-
           <div class="panel panel-warning">
-            <h3 style="color:var(--accent-amber); font-size:1rem; margin-bottom:0.3rem;">
-              CBC (Cipher Block Chaining) - Vulnerável a Adulteração
-            </h3>
-            <p style="font-size:0.86rem; margin-bottom:0.4rem;">
-              Encadeia blocos via operações XOR com o bloco anterior. Elimina os padrões visuais repetidos.
-            </p>
-            <p style="font-size:0.8rem; color:var(--text-muted);">
-              <strong>Limitação Fatal:</strong> Não fornece autenticidade. Permite ataques de inversão de bits (Bit-Flipping) e <em>Padding Oracle</em> sem acusar violação.
-            </p>
+            <h3 style="color:var(--accent-amber);">CBC (Cipher Block Chaining): sem integridade</h3>
+            <p>Encadeia cada bloco ao anterior e esconde as repetições.</p>
+            <p class="muted">Limite: não detecta adulteração. Aceita dados alterados e permite ataques como o Padding Oracle.</p>
           </div>
         </div>
 
-        <!-- CANVAS DO PINGUIM TUX DO NIST -->
         <div class="lab-box">
           <div class="lab-heading">
-            <span>DEMONSTRAÇÃO VISUAL OFICIAL DO NIST: O FENÔMENO DO PINGUIM TUX SOB AES-ECB</span>
+            <span>Pinguim Tux: o mesmo desenho cifrado com AES-ECB e AES-GCM (cifra real do navegador)</span>
           </div>
-
-          <div style="display:flex; justify-content:space-around; align-items:center; background:#fff; border:1.5px solid var(--border-dark); padding:0.6rem;">
-            <div style="text-align:center;">
-              <canvas id="canvas-original" width="96" height="106" style="border:1px solid #cbd5e1;"></canvas>
-              <div style="font-family:var(--font-code); font-size:0.74rem; font-weight:700; margin-top:0.2rem;">Dado Original (Puro)</div>
-            </div>
-
-            <div style="text-align:center;">
-              <canvas id="canvas-ecb" width="96" height="106" style="border:1px solid #cbd5e1;"></canvas>
-              <div style="font-family:var(--font-code); font-size:0.74rem; font-weight:700; color:var(--accent-rose); margin-top:0.2rem;">AES-ECB (Padrões Preservados)</div>
-            </div>
-
-            <div style="text-align:center;">
-              <canvas id="canvas-gcm" width="96" height="106" style="border:1px solid #cbd5e1;"></canvas>
-              <div style="font-family:var(--font-code); font-size:0.74rem; font-weight:700; color:var(--accent-emerald); margin-top:0.2rem;">AES-GCM (Difusão e Ruído Perfeito)</div>
-            </div>
+          <div class="tux-grid">
+            <div class="tux-cell"><canvas id="canvas-original" width="144" height="144" aria-label="Pinguim original"></canvas>Original</div>
+            <div class="tux-cell" style="color:var(--accent-rose);"><canvas id="canvas-ecb" width="144" height="144" aria-label="Pinguim cifrado em ECB, silhueta ainda visível"></canvas>AES-ECB: a silhueta aparece</div>
+            <div class="tux-cell" style="color:var(--accent-emerald);"><canvas id="canvas-gcm" width="144" height="144" aria-label="Pinguim cifrado em GCM, apenas ruído"></canvas>AES-GCM: só ruído</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 5: COMO O AES-GCM FUNCIONA & REGISTRO NO BANCO
-         ========================================== -->
-    <section class="slide" id="slide-5" data-track="A">
+    <!-- SLIDE 5 -->
+    <section class="slide" id="slide-5" data-track="A" aria-label="Slide 5 de 10">
       <div class="slide-topline">
         <div>
-          <div class="slide-category">Pilar 02: Proteção em Repouso • 05 / 10</div>
-          <h2 class="slide-title">Criptografia Autenticada: O Padrão AES-256-GCM (AEAD)</h2>
+          <div class="slide-category">Pilar 02: Repouso • 05 / 10</div>
+          <h2 class="slide-title">AES-256-GCM: sigilo e integridade juntos</h2>
         </div>
-        <span class="pixel-tag">FUNCIONAMENTO & BANCO</span>
+        <span class="pixel-tag">AEAD</span>
       </div>
 
       <div class="slide-content">
-        <!-- Explicação Clara de Como Funciona o AES-GCM -->
-        <div class="panel panel-subtle">
-          <strong style="color:var(--track-a); font-size:0.92rem; display:block; margin-bottom:0.25rem;">
-            Como o AES-GCM funciona na prática? (AEAD = Authenticated Encryption with Associated Data)
-          </strong>
-          <p style="font-size:0.86rem; color:var(--text-main); line-height:1.5;">
-            O <strong>GCM (Galois/Counter Mode)</strong> resolve simultaneamente dois problemas em uma única passagem:<br>
-            <strong>1. Sigilo (Confidencialidade):</strong> A Chave de 256 bits se junta ao <strong>IV (Vetor de Inicialização de 12 bytes)</strong> para gerar um fluxo contínuo de ruído estático reversível que mascara a mensagem.<br>
-            <strong>2. Integridade (Autenticidade):</strong> Em paralelo, uma multiplicação polinomial no Campo de Galois calcula um selo criptográfico inviolável de 16 bytes: a <strong>Authentication Tag</strong>.<br>
-            <em>Se 1 único bit for modificado no banco de dados por um atacante, a tag falha na leitura e o sistema recusa a descriptografia.</em>
+        <div class="panel-subtle">
+          <strong style="color:#1d4ed8;">AEAD = Authenticated Encryption with Associated Data (criptografia autenticada).</strong>
+          <p style="font-size:0.95rem; line-height:1.5; margin-top:0.25rem;">
+            O <strong>GCM (Galois/Counter Mode)</strong> faz duas coisas na mesma passada:<br>
+            <strong>1. Sigilo.</strong> A chave de 256 bits e o <strong>IV (Initialization Vector, 12 bytes sorteados a cada cifragem)</strong> geram uma sequência de bytes que mascara o dado.<br>
+            <strong>2. Integridade.</strong> Em paralelo, o GCM calcula a <strong>Authentication Tag</strong> (16 bytes), um selo do conteúdo cifrado. Se qualquer bit for alterado no banco, a tag não confere e a leitura é recusada.
           </p>
         </div>
 
-        <!-- LAB 2: WEB CRYPTO NATIVO COM TESTE DE ADULTERAÇÃO -->
         <div class="lab-box">
-          <div class="lab-heading">
-            <span>LABORATÓRIO: WEB CRYPTO API NATIVA & TESTE DE INTEGRIDADE</span>
+          <div class="lab-heading"><span>Web Crypto API: cifra e teste de adulteração</span></div>
+          <div class="lab-row">
+            <input type="text" class="lab-input-clean" id="lab2-plaintext" value="CPF: 014.288.931-09 | Limite: R$ 50.000,00" aria-label="Dado sensível a cifrar">
+            <button class="btn-stealth primary" onclick="executeLab2Encrypt()">1. Cifrar</button>
+            <button class="btn-stealth" id="btn-lab2-read" onclick="executeLab2Decrypt(false)" disabled>2. Ler do banco</button>
+            <button class="btn-stealth danger" id="btn-lab2-attack" onclick="executeLab2Decrypt(true)" disabled>3. Adulterar 1 byte</button>
           </div>
-
-          <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
-            <input type="text" class="lab-input-clean" id="lab2-plaintext" value="CPF: 014.288.931-09 | Limite: R$ 50.000,00">
-            <button class="btn-stealth primary" onclick="executeLab2Encrypt()">1. Criptografar</button>
-            <button class="btn-stealth" id="btn-lab2-read" onclick="executeLab2Decrypt(false)" disabled>2. Ler do Banco</button>
-            <button class="btn-stealth" id="btn-lab2-attack" style="border-color:var(--accent-rose); color:var(--accent-rose);" onclick="executeLab2Decrypt(true)" disabled>3. Simular Adulteração</button>
-          </div>
-
-          <div class="lab-output-frame" id="lab2-output">
-            Pressione "1. Criptografar" para ver o IV, o Ciphertext e a Tag de Autenticação gerados pela CPU.
+          <div class="lab-output-frame" id="lab2-output" aria-live="polite">
+            Clique em "1. Cifrar" para gerar IV, texto cifrado e tag com AES-256-GCM.
           </div>
         </div>
 
-        <!-- Estrutura do Banco Separada em Blocos -->
         <div class="panel">
-          <div style="font-family:var(--font-code); font-size:0.78rem; font-weight:700; margin-bottom:0.25rem;">
-            FORMATO DA COLUNA SALVA NO BANCO DE DADOS (TRIO ESTRUTURADO):
-          </div>
+          <div class="kicker">COMO O REGISTRO FICA NA COLUNA DO BANCO (IV : texto cifrado : tag)</div>
           <div class="segment-bar" id="lab2-segment-display">
-            <span class="seg seg-iv">[ IV (12 Bytes Aleatórios) ]</span>
+            <span class="seg seg-iv">IV (12 bytes)</span>
             <span>:</span>
-            <span class="seg seg-hash">[ Ciphertext (Texto Cifrado) ]</span>
+            <span class="seg seg-hash">texto cifrado</span>
             <span>:</span>
-            <span class="seg seg-tag">[ Authentication Tag (16 Bytes de Lacre) ]</span>
+            <span class="seg seg-tag">tag (16 bytes)</span>
           </div>
-          <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.25rem;">
-            A Chave Secreta de 256 bits <strong>nunca reside no banco de dados</strong>. Ela permanece protegida fora da base.
-          </p>
+          <p class="muted" style="font-size:0.9rem;">A chave de 256 bits não entra nessa tabela. Ela fica fora do banco.</p>
         </div>
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 6: ONDE GUARDAR A CHAVE? KMS & HSM
-         ========================================== -->
-    <section class="slide" id="slide-6" data-track="B">
+    <!-- SLIDE 6 -->
+    <section class="slide" id="slide-6" data-track="B" aria-label="Slide 6 de 10">
       <div class="slide-topline">
         <div>
-          <div class="slide-category">Pilar 02: Proteção em Repouso • 06 / 10</div>
-          <h2 class="slide-title">Gerenciamento de Segredos: O Papel do KMS</h2>
+          <div class="slide-category">Pilar 02: Repouso • 06 / 10</div>
+          <h2 class="slide-title">Onde guardar a chave: o papel do KMS</h2>
         </div>
-        <span class="pixel-tag">INFRAESTRUTURA</span>
+        <span class="pixel-tag">Infraestrutura</span>
       </div>
 
       <div class="slide-content">
         <div class="panel panel-danger">
-          <h3 style="color:var(--accent-rose); font-size:1.02rem; margin-bottom:0.3rem;">
-            O Risco do Armazenamento Estático de Chaves (.env / Hardcoded)
-          </h3>
-          <p style="font-size:0.88rem; line-height:1.5;">
-            Salvar chaves mestras no arquivo <code class="code-chip">.env</code> ou variáveis do servidor é uma vulnerabilidade grave: 
-            vazamentos em versionamento de código (GitHub), falhas de RCE (Remote Code Execution) ou dumps de memória expõem a chave definitiva, comprometendo retroativamente todos os dados do banco de dados.
+          <h3 style="color:var(--accent-rose);">Chave no arquivo .env ou no código</h3>
+          <p>
+            Quem lê o servidor lê a chave: um vazamento no GitHub, uma falha de execução remota de código (RCE) ou um dump de memória entrega a chave mestra e abre todos os dados já gravados.
           </p>
         </div>
 
         <div class="grid-2">
           <div class="panel">
-            <div style="font-family:var(--font-code); font-size:0.75rem; font-weight:700; color:var(--track-b); margin-bottom:0.25rem;">
-              COFRE DE SEGURANÇA EM NUVEM
-            </div>
-            <h3 style="font-size:1rem; margin-bottom:0.35rem;">KMS (Key Management Service) & HSM</h3>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.4rem;">
-              Exemplos: AWS KMS, Google Cloud KMS, HashiCorp Vault.
-            </p>
-            <p style="font-size:0.86rem;">
-              A <strong>KEK (Key Encryption Key - Chave Mestra)</strong> reside dentro de módulos físicos de hardware blindados chamados <strong>HSM (Hardware Security Module)</strong>. 
-              O material binário da KEK é <strong>estritamente não-exportável</strong>.
+            <div class="kicker" style="color:var(--track-b);">COFRE GERENCIADO</div>
+            <h3>KMS (Key Management Service) e HSM</h3>
+            <p class="muted">Exemplos: AWS KMS, Google Cloud KMS, HashiCorp Vault.</p>
+            <p>
+              A <strong>KEK (Key Encryption Key, chave mestra)</strong> fica dentro de um <strong>HSM (Hardware Security Module)</strong>, hardware dedicado. A chave não pode ser exportada: o servidor só pede operações.
             </p>
           </div>
-
           <div class="panel">
-            <div style="font-family:var(--font-code); font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:0.25rem;">
-              O DILEMA DE PERFORMANCE
-            </div>
-            <h3 style="font-size:1rem; margin-bottom:0.35rem;">Por que não enviar todo dado ao KMS?</h3>
-            <ul style="font-size:0.82rem; color:var(--text-muted); margin-left:1.1rem; line-height:1.5;">
-              <li><strong>Latência Elevada:</strong> 50ms a 200ms por chamada externa de rede (inviabiliza APIs de alta escala).</li>
-              <li><strong>Custo Financeiro:</strong> Cobrança tarifada por cada requisição de API feita ao cofre de chaves.</li>
-              <li><strong>Teto de Volume:</strong> Limite de tamanho por payload (ex: 4 KB no AWS KMS).</li>
+            <div class="kicker muted">POR QUE NÃO CIFRAR TUDO NO KMS</div>
+            <h3>Cada registro viraria uma chamada de rede</h3>
+            <ul style="margin-left:1.1rem;" class="muted">
+              <li><strong>Desempenho:</strong> uma ida e volta de rede por registro.</li>
+              <li><strong>Custo:</strong> o provedor cobra por requisição.</li>
+              <li><strong>Tamanho:</strong> o AWS KMS aceita no máximo 4 KB por chamada de Encrypt.</li>
             </ul>
           </div>
         </div>
 
-        <div class="panel panel-success" style="font-size:0.85rem;">
-          <strong>A Solução da Engenharia:</strong> Adotar o padrão <strong>Envelope Encryption (Criptografia de Envelope)</strong>, separando a responsabilidade entre chaves locais efêmeras (DEK) e chaves mestras no cofre (KEK).
+        <div class="panel panel-success">
+          <strong>Solução:</strong> Envelope Encryption. Uma chave de dados local e descartável (DEK) cifra o dado; a KEK, que fica no KMS, cifra só a DEK.
         </div>
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 7: ENVELOPE ENCRYPTION - CANVAS ANIMADO DO HARDWARE KMS
-         ========================================== -->
-    <section class="slide" id="slide-7" data-track="B">
+    <!-- SLIDE 7 -->
+    <section class="slide" id="slide-7" data-track="B" aria-label="Slide 7 de 10">
       <div class="slide-topline">
         <div>
-          <div class="slide-category">Pilar 02: Proteção em Repouso • 07 / 10</div>
-          <h2 class="slide-title">Envelope Encryption: O Fluxo do Hardware KMS ao Banco</h2>
+          <div class="slide-category">Pilar 02: Repouso • 07 / 10</div>
+          <h2 class="slide-title">Envelope Encryption: o caminho das chaves</h2>
         </div>
-        <span class="pixel-tag">DIAGRAMA INTERATIVO</span>
+        <span class="pixel-tag">Diagrama interativo</span>
       </div>
 
       <div class="slide-content">
-        <!-- CANVAS ANIMADO DO HARDWARE KMS E BACKEND -->
         <div class="lab-box">
           <div class="lab-heading">
-            <span>FLUXO COMPLETO DE ENVELOPE: INTERAÇÃO ENTRE HARDWARE HSM, RAM E BANCO</span>
-            <div>
-              <button class="btn-stealth primary" onclick="runKmsStep()">Avançar Etapa do Diagrama</button>
-              <button class="btn-stealth" onclick="resetKmsDiagram()">Reiniciar</button>
+            <span>KMS, backend e banco: escrita e leitura</span>
+            <div style="display:flex; gap:0.5rem;">
+              <button class="btn-stealth primary" id="btn-kms-next" onclick="kmsNext()">Próxima etapa</button>
+              <button class="btn-stealth" onclick="kmsReset()">Reiniciar</button>
             </div>
           </div>
-
-          <canvas id="canvas-kms" class="interactive-canvas" width="1000" height="230"></canvas>
+          <canvas id="canvas-kms" class="interactive-canvas" role="img" aria-label="Diagrama animado do Envelope Encryption entre KMS, backend e banco de dados"></canvas>
         </div>
 
-        <div class="panel-subtle" id="kms-status-box" style="font-size:0.86rem; line-height:1.5;">
-          <strong>Pressione "Avançar Etapa do Diagrama"</strong> para acompanhar o ciclo de vida: do hardware HSM ao descarte da chave da memória RAM.
+        <div class="panel-subtle" id="kms-status-box" style="font-size:1rem; line-height:1.5;" aria-live="polite">
+          Clique em "Próxima etapa" para percorrer a escrita e a leitura de um dado protegido.
         </div>
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 8: TLS 1.3 - CANVAS ANIMADO DA MISTURA DE TINTAS
-         ========================================== -->
-    <section class="slide" id="slide-8" data-track="B">
+    <!-- SLIDE 8 -->
+    <section class="slide" id="slide-8" data-track="B" aria-label="Slide 8 de 10">
       <div class="slide-topline">
         <div>
-          <div class="slide-category">Pilar 03: Proteção em Trânsito • 08 / 10</div>
-          <h2 class="slide-title">Proteção em Trânsito: TLS 1.3 & Troca Diffie-Hellman</h2>
+          <div class="slide-category">Pilar 03: Trânsito • 08 / 10</div>
+          <h2 class="slide-title">TLS 1.3 e a troca de chaves Diffie-Hellman</h2>
         </div>
-        <span class="pixel-tag">MISTURA DE CHAVES</span>
+        <span class="pixel-tag">Mistura de cores</span>
       </div>
 
       <div class="slide-content">
         <div class="grid-2">
           <div class="panel-subtle">
-            <strong style="font-size:0.86rem;">Latência Reduzida: Handshake de 1-RTT</strong>
-            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">
-              O cliente envia sua proposta de chave logo no primeiro pacote (<code class="code-chip">ClientHello</code>), cortando pela metade as idas e voltas (Round-Trips) de rede necessárias no TLS 1.2.
-            </p>
+            <strong>Handshake de 1-RTT.</strong>
+            <span class="muted" style="font-size:0.95rem;"> O cliente já manda sua parte da chave no primeiro pacote (<span class="code-chip">ClientHello</span>). O TLS 1.2 precisava de 2 idas e voltas.</span>
           </div>
           <div class="panel-subtle">
-            <strong style="font-size:0.86rem;">PFS (Perfect Forward Secrecy)</strong>
-            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">
-              Chaves de sessão efêmeras destruídas após a requisição. O TLS 1.3 baniu o RSA estático: capturas de tráfego histórico jamais poderão ser decifradas no futuro.
-            </p>
+            <strong>Forward Secrecy.</strong>
+            <span class="muted" style="font-size:0.95rem;"> As chaves de sessão são descartáveis. Tráfego gravado hoje não é aberto no futuro, mesmo se a chave do servidor vazar.</span>
           </div>
         </div>
 
-        <!-- CANVAS ANIMADO DA MISTURA DE TINTAS (DIFFIE-HELLMAN) -->
-        <div class="lab-box">
-          <div class="lab-heading">
-            <span>CANVAS ANIMADO: DERIVAÇÃO DIFFIE-HELLMAN SOBRE CANAL PÚBLICO</span>
-            <button class="btn-stealth primary" id="btn-dh-sim" onclick="runDhAnimation()">Iniciar Animação de Troca</button>
-          </div>
+        <svg class="static-diagram" viewBox="0 0 1000 340" role="img" aria-label="Diagrama da troca de chaves: cliente com segredo azul envia verde, servidor com segredo vermelho envia laranja, amarelo é público, cada lado combina o recebido com seu segredo e obtém marrom">
+          <defs>
+            <style>
+              .t { font-family: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace; font-weight: 700; }
+              .tn { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
+            </style>
+          </defs>
 
-          <canvas id="canvas-dh" class="interactive-canvas" width="1000" height="210"></canvas>
-        </div>
+          <!-- caixas -->
+          <rect x="24" y="14" width="250" height="316" fill="#f6f7f9" stroke="#1e293b" stroke-width="2"/>
+          <rect x="726" y="14" width="250" height="316" fill="#f6f7f9" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="44" y="42" font-size="16" fill="#0f172a">CLIENTE</text>
+          <text class="t" x="746" y="42" font-size="16" fill="#0f172a">SERVIDOR</text>
 
-        <div class="panel-subtle" id="dh-status-text" style="font-size:0.84rem; text-align:center; color:var(--text-muted);">
-          Pressione "Iniciar Animação de Troca" para visualizar os fluxos de cores cruzando a linha amarela pública.
-        </div>
+          <!-- linhas -->
+          <line x1="274" y1="85" x2="716" y2="85" stroke="#16a34a" stroke-width="6"/>
+          <polygon points="726,85 710,77 710,93" fill="#16a34a"/>
+          <line x1="274" y1="170" x2="726" y2="170" stroke="#eab308" stroke-width="6"/>
+          <line x1="284" y1="230" x2="726" y2="230" stroke="#ea580c" stroke-width="6"/>
+          <polygon points="274,230 290,222 290,238" fill="#ea580c"/>
+
+          <!-- rótulos das linhas -->
+          <rect x="430" y="68" width="140" height="34" fill="#16a34a" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="500" y="91" font-size="17" fill="#ffffff" text-anchor="middle">verde</text>
+          <text class="tn" x="500" y="122" font-size="15" fill="#3f4b5f" text-anchor="middle">amarelo + azul</text>
+
+          <rect x="410" y="153" width="180" height="34" fill="#fde047" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="500" y="176" font-size="17" fill="#0f172a" text-anchor="middle">amarelo</text>
+          <text class="tn" x="500" y="148" font-size="15" fill="#3f4b5f" text-anchor="middle">cor pública, todos conhecem</text>
+
+          <rect x="430" y="213" width="140" height="34" fill="#ea580c" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="500" y="236" font-size="17" fill="#ffffff" text-anchor="middle">laranja</text>
+          <text class="tn" x="500" y="266" font-size="15" fill="#3f4b5f" text-anchor="middle">amarelo + vermelho</text>
+
+          <text class="tn" x="500" y="304" font-size="15" fill="#0f172a" text-anchor="middle">O espião vê amarelo, verde e laranja.</text>
+          <text class="tn" x="500" y="324" font-size="15" fill="#0f172a" text-anchor="middle">O marrom nunca passa pela linha.</text>
+
+          <!-- cliente -->
+          <rect x="44" y="68" width="210" height="34" fill="#2563eb" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="149" y="91" font-size="16" fill="#ffffff" text-anchor="middle">segredo: azul</text>
+
+          <rect x="44" y="153" width="210" height="34" fill="#ea580c" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="149" y="176" font-size="16" fill="#ffffff" text-anchor="middle">recebe: laranja</text>
+          <line x1="149" y1="187" x2="149" y2="205" stroke="#ea580c" stroke-width="4"/>
+          <polygon points="149,213 141,198 157,198" fill="#ea580c"/>
+
+          <rect x="44" y="213" width="210" height="34" fill="#78350f" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="149" y="236" font-size="16" fill="#ffffff" text-anchor="middle">marrom (chave)</text>
+
+          <line x1="149" y1="273" x2="149" y2="255" stroke="#2563eb" stroke-width="4"/>
+          <polygon points="149,247 141,262 157,262" fill="#2563eb"/>
+          <rect x="44" y="273" width="210" height="34" fill="#2563eb" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="149" y="296" font-size="16" fill="#ffffff" text-anchor="middle">seu segredo: azul</text>
+
+          <!-- servidor -->
+          <rect x="746" y="68" width="210" height="34" fill="#dc2626" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="851" y="91" font-size="16" fill="#ffffff" text-anchor="middle">segredo: vermelho</text>
+
+          <rect x="746" y="153" width="210" height="34" fill="#16a34a" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="851" y="176" font-size="16" fill="#ffffff" text-anchor="middle">recebe: verde</text>
+          <line x1="851" y1="187" x2="851" y2="205" stroke="#16a34a" stroke-width="4"/>
+          <polygon points="851,213 843,198 859,198" fill="#16a34a"/>
+
+          <rect x="746" y="213" width="210" height="34" fill="#78350f" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="851" y="236" font-size="16" fill="#ffffff" text-anchor="middle">marrom (chave)</text>
+
+          <line x1="851" y1="273" x2="851" y2="255" stroke="#dc2626" stroke-width="4"/>
+          <polygon points="851,247 843,262 859,262" fill="#dc2626"/>
+          <rect x="746" y="273" width="210" height="34" fill="#dc2626" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="851" y="296" font-size="16" fill="#ffffff" text-anchor="middle">seu segredo: vermelho</text>
+        </svg>
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 9: IDENTIDADE, CAS E CRACHÁ MTLS
-         ========================================== -->
-    <section class="slide" id="slide-9" data-track="B">
+    <!-- SLIDE 9 -->
+    <section class="slide" id="slide-9" data-track="B" aria-label="Slide 9 de 10">
       <div class="slide-topline">
         <div>
-          <div class="slide-category">Pilar 03: Proteção em Trânsito • 09 / 10</div>
-          <h2 class="slide-title">Identidade Digital: Certificados X.509 e mTLS</h2>
+          <div class="slide-category">Pilar 03: Trânsito • 09 / 10</div>
+          <h2 class="slide-title">Certificados X.509 e mTLS</h2>
         </div>
-        <span class="pixel-tag">ZERO TRUST</span>
+        <span class="pixel-tag">Identidade</span>
       </div>
 
       <div class="slide-content">
-        <p style="font-size:0.88rem; color:var(--text-muted);">
-          A cifra tranca a comunicação contra escuta clandestina, mas a <strong>autenticidade</strong> exige a comprovação formal da identidade de quem está na outra ponta:
+        <p class="muted">
+          A cifra impede a escuta, mas não diz quem está do outro lado. Quem prova a identidade é o <strong>certificado X.509</strong>, assinado por uma <strong>CA (Certificate Authority, autoridade certificadora)</strong>.
         </p>
 
-        <!-- CANVAS / GRÁFICO REPRESENTATIVO DOS CRACHÁS MTLS -->
-        <div class="lab-box">
-          <div class="lab-heading">
-            <span>AUTENTICAÇÃO MÚTUA: DUAS ENTIDADES APRESENTANDO CRACHÁS CRIPTOGRÁFICOS</span>
-            <button class="btn-stealth primary" onclick="runBadgeAnimation()">Validar Conexão Mútua</button>
-          </div>
+        <svg class="static-diagram" viewBox="0 0 1000 320" role="img" aria-label="Dois serviços trocando certificados assinados pela mesma CA interna, cada um mostrando o seu e validando o do outro">
+          <defs>
+            <style>
+              .t { font-family: ui-monospace, "Cascadia Code", Menlo, Consolas, monospace; font-weight: 700; }
+              .tn { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; }
+            </style>
+          </defs>
 
-          <canvas id="canvas-badges" class="interactive-canvas" width="1000" height="190"></canvas>
-        </div>
+          <!-- CA -->
+          <rect x="360" y="10" width="280" height="56" fill="#ede9fe" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="500" y="34" font-size="16" fill="#4c1d95" text-anchor="middle">CA interna</text>
+          <text class="tn" x="500" y="55" font-size="14" fill="#3f4b5f" text-anchor="middle">assina os dois certificados</text>
+          <line x1="410" y1="66" x2="230" y2="116" stroke="#7c3aed" stroke-width="3" stroke-dasharray="6 5"/>
+          <line x1="590" y1="66" x2="770" y2="116" stroke="#7c3aed" stroke-width="3" stroke-dasharray="6 5"/>
+
+          <!-- serviço A -->
+          <rect x="30" y="100" width="320" height="210" fill="#eff6ff" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="50" y="128" font-size="16" fill="#0f172a">SERVIÇO DE PAGAMENTOS</text>
+          <rect x="52" y="146" width="276" height="140" fill="#ffffff" stroke="#2563eb" stroke-width="2"/>
+          <text class="t" x="68" y="174" font-size="15" fill="#1d4ed8">CERTIFICADO X.509</text>
+          <text class="tn" x="68" y="204" font-size="15" fill="#0f172a">Nome: pagamentos.interno</text>
+          <text class="tn" x="68" y="230" font-size="15" fill="#0f172a">Emissor: CA interna</text>
+          <text class="tn" x="68" y="256" font-size="15" fill="#0f172a">Assinatura: válida</text>
+
+          <!-- serviço B -->
+          <rect x="650" y="100" width="320" height="210" fill="#ecfdf5" stroke="#1e293b" stroke-width="2"/>
+          <text class="t" x="670" y="128" font-size="16" fill="#0f172a">SERVIÇO DE SALDO</text>
+          <rect x="672" y="146" width="276" height="140" fill="#ffffff" stroke="#047857" stroke-width="2"/>
+          <text class="t" x="688" y="174" font-size="15" fill="#047857">CERTIFICADO X.509</text>
+          <text class="tn" x="688" y="204" font-size="15" fill="#0f172a">Nome: saldo.interno</text>
+          <text class="tn" x="688" y="230" font-size="15" fill="#0f172a">Emissor: CA interna</text>
+          <text class="tn" x="688" y="256" font-size="15" fill="#0f172a">Assinatura: válida</text>
+
+          <!-- trocas -->
+          <text class="tn" x="500" y="176" font-size="15" fill="#0f172a" text-anchor="middle">mostra o certificado do cliente</text>
+          <line x1="352" y1="190" x2="640" y2="190" stroke="#2563eb" stroke-width="5"/>
+          <polygon points="650,190 634,182 634,198" fill="#2563eb"/>
+
+          <line x1="360" y1="236" x2="648" y2="236" stroke="#047857" stroke-width="5"/>
+          <polygon points="350,236 366,228 366,244" fill="#047857"/>
+          <text class="tn" x="500" y="266" font-size="15" fill="#0f172a" text-anchor="middle">mostra o certificado do servidor</text>
+        </svg>
 
         <div class="grid-2">
           <div class="panel">
-            <h4 style="font-size:0.92rem; margin-bottom:0.25rem;">HTTPS Convencional (Unidirecional)</h4>
-            <p style="font-size:0.82rem; color:var(--text-muted);">
-              Apenas o <strong>servidor</strong> apresenta o Certificado Digital X.509 assinado por uma <strong>CA (Certificate Authority)</strong>. O cliente permanece anônimo na camada de rede.
-            </p>
+            <h3>HTTPS comum</h3>
+            <p class="muted">Só o <strong>servidor</strong> mostra o certificado. O cliente continua anônimo na camada de rede.</p>
           </div>
-
           <div class="panel panel-success">
-            <h4 style="color:var(--accent-emerald); font-size:0.92rem; margin-bottom:0.25rem;">mTLS (Mutual TLS no Backend)</h4>
-            <p style="font-size:0.82rem; color:var(--text-muted);">
-              <strong>Ambos os serviços apresentam crachás assinados</strong> pela CA interna corporativa. Requisições sem crachá válido são rejeitadas na camada TCP/TLS antes de qualquer código de API ser executado.
-            </p>
+            <h3 style="color:var(--accent-emerald);">mTLS (Mutual TLS)</h3>
+            <p class="muted"><strong>Os dois lados</strong> mostram certificado assinado pela CA interna. Sem certificado válido, a conexão cai antes de qualquer código da API rodar.</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ==========================================
-         SLIDE 10: CONCLUSÃO & CHECKLIST TÉCNICO
-         ========================================== -->
-    <section class="slide" id="slide-10" data-track="A">
+    <!-- SLIDE 10 -->
+    <section class="slide" id="slide-10" data-track="A" aria-label="Slide 10 de 10">
       <div class="slide-topline">
         <div>
-          <div class="slide-category">10 / 10 • Diretrizes Finais</div>
-          <h2 class="slide-title">Diretrizes de Produção para Engenharia Backend</h2>
+          <div class="slide-category">10 / 10 • Resumo</div>
+          <h2 class="slide-title">Checklist para o backend em produção</h2>
         </div>
-        <span class="pixel-tag">CHECKLIST TÉCNICO</span>
+        <span class="pixel-tag">Resumo</span>
       </div>
 
       <div class="slide-content">
-        <p style="font-size:0.92rem; font-weight:600;">
-          Princípios fundamentais consolidados para a sustentação de arquiteturas seguras:
-        </p>
-
         <div class="grid-3">
           <div class="panel panel-success">
-            <strong style="color:var(--accent-emerald); font-size:0.9rem; display:block; margin-bottom:0.3rem;">
-              1. Credenciais
-            </strong>
-            <ul style="font-size:0.82rem; color:var(--text-muted); line-height:1.55; margin-left:1.1rem;">
-              <li>Elimine completamente SHA-256 e MD5 para senhas.</li>
-              <li>Implemente <strong>Argon2id</strong> (padrão OWASP) ou <strong>bcrypt</strong> com custo elevado.</li>
-              <li>O Salt garante unicidade e é preservado no hash modular.</li>
+            <strong style="color:var(--accent-emerald);">1. Senhas</strong>
+            <ul class="muted" style="margin:0.35rem 0 0 1.1rem;">
+              <li>Nada de SHA-256 ou MD5 para senha.</li>
+              <li>Argon2id (padrão OWASP) ou bcrypt com custo alto.</li>
+              <li>O salt é público e fica dentro do hash.</li>
             </ul>
           </div>
-
           <div class="panel panel-success">
-            <strong style="color:var(--accent-emerald); font-size:0.9rem; display:block; margin-bottom:0.3rem;">
-              2. Dados em Repouso
-            </strong>
-            <ul style="font-size:0.82rem; color:var(--text-muted); line-height:1.55; margin-left:1.1rem;">
-              <li>Utilize cifras AEAD (<strong>AES-256-GCM</strong>) com validação de Auth Tag.</li>
-              <li>Abandone modos estruturalmente falhos (ECB e CBC puro).</li>
-              <li>Adote <strong>Envelope Encryption</strong> para isolar chaves no KMS.</li>
+            <strong style="color:var(--accent-emerald);">2. Dados em repouso</strong>
+            <ul class="muted" style="margin:0.35rem 0 0 1.1rem;">
+              <li>AES-256-GCM, sempre conferindo a tag.</li>
+              <li>Sem ECB e sem CBC puro.</li>
+              <li>Envelope Encryption: a KEK fica no KMS.</li>
             </ul>
           </div>
-
           <div class="panel panel-success">
-            <strong style="color:var(--accent-emerald); font-size:0.9rem; display:block; margin-bottom:0.3rem;">
-              3. Dados em Trânsito
-            </strong>
-            <ul style="font-size:0.82rem; color:var(--text-muted); line-height:1.55; margin-left:1.1rem;">
-              <li>Exija comunicação estrita em <strong>TLS 1.3</strong> (1-RTT e PFS).</li>
-              <li>Valide cadeias de certificados emitidas por CAs confiáveis.</li>
-              <li>Implemente <strong>mTLS</strong> para tráfego entre microsserviços internos.</li>
+            <strong style="color:var(--accent-emerald);">3. Dados em trânsito</strong>
+            <ul class="muted" style="margin:0.35rem 0 0 1.1rem;">
+              <li>TLS 1.3 com Forward Secrecy.</li>
+              <li>Certificados de CAs confiáveis.</li>
+              <li>mTLS entre os serviços internos.</li>
             </ul>
           </div>
         </div>
 
-        <div class="panel" style="background:#f1f5f9; text-align:center; padding:1.25rem;">
-          <h3 style="font-size:1.1rem; margin-bottom:0.25rem;">Agradecemos a Atenção!</h3>
-          <p style="font-size:0.88rem; color:var(--text-muted);">
-            Sessão Aberta para Considerações e Perguntas da Banca • CEUB
-          </p>
+        <div class="panel" style="background:#eef1f5; text-align:center; padding:1.2rem;">
+          <h3 style="font-size:1.2rem;">Perguntas?</h3>
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- Footer Navigation -->
   <footer class="deck-footer">
     <div style="display:flex; align-items:center; gap:0.5rem;">
-      <button class="btn-stealth" id="btn-prev" onclick="prevSlide()">◀ Anterior</button>
-      <button class="btn-stealth primary" id="btn-next" onclick="nextSlide()">Próximo ▶</button>
+      <button class="btn-stealth" id="btn-prev" onclick="prevSlide()">Anterior</button>
+      <button class="btn-stealth primary" id="btn-next" onclick="nextSlide()">Próximo</button>
     </div>
-
-    <!-- Progress Track -->
     <div class="footer-progress">
       <span class="pixel-tag" id="slide-counter">01 / 10</span>
-      <div class="progress-track">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
     </div>
-
-    <div class="subtle-hint">
-      Navegação: <kbd>←</kbd> <kbd>→</kbd> <kbd>Espaço</kbd>
-    </div>
+    <div class="subtle-hint">Teclado: setas, espaço, F</div>
   </footer>
 
-  <!-- Interactive Scripts & Canvas Simulations -->
+  <script src="assets/hash-wasm.umd.min.js"></script>
   <script>
-    // ==========================================
-    // DECK CONTROLLER
-    // ==========================================
+    // ============================================================
+    // CONTROLE DOS SLIDES
+    // ============================================================
     let currentSlide = 1;
     const totalSlides = 10;
 
     function updateDeck() {
       document.querySelectorAll('.slide').forEach((el, idx) => {
-        el.classList.toggle('active', (idx + 1) === currentSlide);
+        const active = (idx + 1) === currentSlide;
+        el.classList.toggle('active', active);
+        el.setAttribute('aria-hidden', active ? 'false' : 'true');
       });
+      document.getElementById('slide-counter').innerText =
+        `${String(currentSlide).padStart(2, '0')} / ${String(totalSlides).padStart(2, '0')}`;
 
-      document.getElementById('slide-counter').innerText = 
-        `${currentSlide.toString().padStart(2, '0')} / ${totalSlides.toString().padStart(2, '0')}`;
-
-      const pct = (currentSlide / totalSlides) * 100;
       const fill = document.getElementById('progress-fill');
-      fill.style.width = `${pct}%`;
+      fill.style.width = `${(currentSlide / totalSlides) * 100}%`;
 
-      const activeEl = document.getElementById(`slide-${currentSlide}`);
-      const track = activeEl.getAttribute('data-track');
-      const trackCorner = document.getElementById('track-corner');
+      const track = document.getElementById(`slide-${currentSlide}`).getAttribute('data-track');
+      const color = track === 'A' ? 'var(--track-a)' : 'var(--track-b)';
+      document.getElementById('track-corner').style.background = color;
+      fill.style.background = color;
 
-      if (track === "A") {
-        trackCorner.style.background = "var(--track-a)";
-        fill.style.background = "var(--track-a)";
-      } else {
-        trackCorner.style.background = "var(--track-b)";
-        fill.style.background = "var(--track-b)";
-      }
+      document.getElementById('btn-prev').disabled = currentSlide === 1;
+      document.getElementById('btn-next').disabled = currentSlide === totalSlides;
 
-      // Triggers específicos por slide
       if (currentSlide === 4) drawTuxCanvases();
-      if (currentSlide === 7) initKmsCanvas();
-      if (currentSlide === 8) initDhCanvas();
-      if (currentSlide === 9) initBadgesCanvas();
+      if (currentSlide === 7) requestAnimationFrame(() => drawKms(0));
     }
 
-    function nextSlide() {
-      if (currentSlide < totalSlides) {
-        currentSlide++;
-        updateDeck();
-      }
-    }
-
-    function prevSlide() {
-      if (currentSlide > 1) {
-        currentSlide--;
-        updateDeck();
-      }
-    }
+    function nextSlide() { if (currentSlide < totalSlides) { currentSlide++; updateDeck(); } }
+    function prevSlide() { if (currentSlide > 1) { currentSlide--; updateDeck(); } }
 
     document.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
-        e.preventDefault();
-        nextSlide();
-      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
-        e.preventDefault();
-        prevSlide();
-      } else if (e.key.toLowerCase() === 'f') {
-        e.preventDefault();
-        toggleFullscreen();
-      }
+      if (e.target.tagName === 'BUTTON' && (e.key === ' ' || e.key === 'Enter')) return;
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); nextSlide(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prevSlide(); }
+      else if (e.key.toLowerCase() === 'f') { e.preventDefault(); toggleFullscreen(); }
     });
 
     function toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+      else if (document.exitFullscreen) document.exitFullscreen();
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    // ============================================================
+    // LAB 1: bcrypt e Argon2id reais (hash-wasm, WebAssembly local)
+    // ============================================================
+    let lastHash = null;      // { kind, hash }
+    let previousHash = {};    // último hash por algoritmo, para comparar
+
+    function setBusy(busy) {
+      ['btn-bcrypt', 'btn-argon'].forEach(id => document.getElementById(id).disabled = busy);
+      document.getElementById('btn-verify').disabled = busy || !lastHash;
+    }
+
+    function parseBcrypt(h) {
+      const m = h.match(/^\$(2[abxy])\$(\d{2})\$(.{22})(.{31})$/);
+      return m ? { version: m[1], cost: m[2], salt: m[3], digest: m[4] } : null;
+    }
+    function parseArgon(h) {
+      const p = h.split('$'); // ['', 'argon2id', 'v=19', 'm=..,t=..,p=..', salt, digest]
+      return p.length === 6 ? { algo: p[1], ver: p[2], params: p[3], salt: p[4], digest: p[5] } : null;
+    }
+
+    async function generateHash(kind) {
+      const out = document.getElementById('lab1-output');
+      const runtime = document.getElementById('hash-runtime');
+      const password = document.getElementById('lab1-input').value;
+      if (!password) { out.textContent = 'Digite uma senha antes de gerar o hash.'; return; }
+      if (typeof hashwasm === 'undefined') { out.textContent = 'Biblioteca de hash não carregada (assets/hash-wasm.umd.min.js).'; return; }
+
+      setBusy(true);
+      runtime.textContent = 'Calculando...';
+      out.textContent = 'Calculando o hash...';
+      await new Promise(r => setTimeout(r, 30)); // deixa a interface pintar antes do cálculo pesado
+
+      try {
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const t0 = performance.now();
+        let hash;
+        if (kind === 'bcrypt') {
+          hash = await hashwasm.bcrypt({ password, salt, costFactor: 12, outputType: 'encoded' });
+        } else {
+          hash = await hashwasm.argon2id({ password, salt, parallelism: 4, iterations: 3, memorySize: 65536, hashLength: 32, outputType: 'encoded' });
+        }
+        const ms = performance.now() - t0;
+        runtime.textContent = `Calculado em ${ms.toFixed(0)} ms neste navegador`;
+
+        lastHash = { kind, hash };
+        const before = previousHash[kind];
+        previousHash[kind] = hash;
+        renderHash(kind, hash, before);
+      } catch (err) {
+        runtime.textContent = 'Erro';
+        out.textContent = `Falha ao gerar o hash: ${err.message || err}`;
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function renderHash(kind, hash, before) {
+      const out = document.getElementById('lab1-output');
+      let segs, legend;
+      if (kind === 'bcrypt') {
+        const p = parseBcrypt(hash);
+        if (!p) { out.textContent = hash; return; }
+        segs = `
+          <span class="seg seg-algo">$${p.version}</span>$<span class="seg seg-cost">${p.cost}</span>$<span class="seg seg-salt">${p.salt}</span><span class="seg seg-hash">${p.digest}</span>`;
+        legend = `
+          <div><span class="seg seg-algo">$${p.version}</span>versão do formato bcrypt</div>
+          <div><span class="seg seg-cost">${p.cost}</span>custo: 2<sup>${p.cost}</sup> = ${Math.pow(2, +p.cost).toLocaleString('pt-BR')} rodadas</div>
+          <div><span class="seg seg-salt">salt</span>16 bytes aleatórios, público, fica no hash</div>
+          <div><span class="seg seg-hash">hash</span>resultado da derivação da senha com o salt</div>`;
       } else {
-        if (document.exitFullscreen) document.exitFullscreen();
+        const p = parseArgon(hash);
+        if (!p) { out.textContent = hash; return; }
+        segs = `
+          <span class="seg seg-algo">$${p.algo}</span>$<span class="seg seg-cost">${p.ver}</span>$<span class="seg seg-cost">${p.params}</span>$<span class="seg seg-salt">${p.salt}</span>$<span class="seg seg-hash">${p.digest}</span>`;
+        legend = `
+          <div><span class="seg seg-algo">argon2id</span>algoritmo (variante híbrida)</div>
+          <div><span class="seg seg-cost">v=19</span>versão 1.3 do Argon2</div>
+          <div><span class="seg seg-cost">m, t, p</span>memória (KiB), passadas, lanes</div>
+          <div><span class="seg seg-salt">salt</span>aleatório, público, fica no hash</div>
+          <div><span class="seg seg-hash">hash</span>resultado da derivação (32 bytes)</div>`;
+      }
+      const compare = before
+        ? `<div style="margin-top:0.5rem; font-size:0.85rem;"><strong>Mesma senha, geração anterior:</strong> <span style="color:#3f4b5f;">${escapeHtml(before)}</span></div>`
+        : '';
+      out.innerHTML = `
+        <div class="segment-bar">${segs}</div>
+        <div class="legend">${legend}</div>
+        ${compare}`;
+    }
+
+    async function verifyHash() {
+      const out = document.getElementById('lab1-output');
+      const runtime = document.getElementById('hash-runtime');
+      if (!lastHash) return;
+      const password = document.getElementById('lab1-input').value;
+      setBusy(true);
+      runtime.textContent = 'Verificando...';
+      await new Promise(r => setTimeout(r, 30));
+      try {
+        const t0 = performance.now();
+        const ok = lastHash.kind === 'bcrypt'
+          ? await hashwasm.bcryptVerify({ password, hash: lastHash.hash })
+          : await hashwasm.argon2Verify({ password, hash: lastHash.hash });
+        const ms = performance.now() - t0;
+        runtime.textContent = `Verificado em ${ms.toFixed(0)} ms`;
+        const color = ok ? 'var(--accent-emerald)' : 'var(--accent-rose)';
+        const text = ok
+          ? 'A senha confere. O salt e os parâmetros foram lidos de dentro do hash salvo.'
+          : 'A senha não confere com o hash salvo.';
+        out.insertAdjacentHTML('beforeend', `<div style="margin-top:0.55rem; font-weight:700; color:${color};">${text}</div>`);
+      } catch (err) {
+        out.insertAdjacentHTML('beforeend', `<div style="margin-top:0.55rem; color:var(--accent-rose);">Falha na verificação: ${escapeHtml(err.message || err)}</div>`);
+      } finally {
+        setBusy(false);
       }
     }
 
-    // ==========================================
-    // LAB 1: MOTOR DINÂMICO DE HASHING (BCRYPT / ARGON2ID)
-    // ==========================================
-    const B64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789./";
-    function randomB64(len) {
-      let res = "";
-      for (let i = 0; i < len; i++) {
-        res += B64_CHARS[Math.floor(Math.random() * B64_CHARS.length)];
-      }
-      return res;
-    }
-
-    function generateDynamicBcrypt() {
-      const pwd = document.getElementById('lab1-input').value || "segredo";
-      const salt = randomB64(22);
-      const digest = randomB64(31);
-      const fakeLatency = (95 + Math.random() * 40).toFixed(1);
-
-      document.getElementById('hash-runtime').innerText = `Tempo de cálculo: ${fakeLatency} ms (4.096 iterações)`;
-
-      document.getElementById('lab1-output').innerHTML = `
-        <div style="margin-bottom:0.3rem;"><strong>Dissecação bcrypt Gerada em Tempo Real:</strong></div>
-        <div class="segment-bar">
-          <span class="seg seg-algo">$2b</span>
-          <span>$</span>
-          <span class="seg seg-cost">12</span>
-          <span>$</span>
-          <span class="seg seg-salt">${salt}</span>
-          <span class="seg seg-hash">${digest}</span>
-        </div>
-        <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.35rem; line-height:1.45;">
-          • <span style="color:#14532d; font-weight:bold;">$2b</span>: Versão do algoritmo | 
-          • <span style="color:#1e3a8a; font-weight:bold;">12</span>: Fator de custo (2<sup>12</sup> voltas de CPU) | 
-          • <span style="background:#fef08a; font-weight:bold;">${salt}</span>: Novo Salt aleatório único de 128 bits | 
-          • <span style="color:#581c87; font-weight:bold;">${digest}</span>: Digest resultante
-        </div>
-      `;
-    }
-
-    function generateDynamicArgon() {
-      const pwd = document.getElementById('lab1-input').value || "segredo";
-      const salt = randomB64(22);
-      const digest = randomB64(32);
-      const fakeLatency = (180 + Math.random() * 50).toFixed(1);
-
-      document.getElementById('hash-runtime').innerText = `Tempo de cálculo: ${fakeLatency} ms (64 MB RAM)`;
-
-      document.getElementById('lab1-output').innerHTML = `
-        <div style="margin-bottom:0.3rem;"><strong>Dissecação Argon2id Gerada em Tempo Real:</strong></div>
-        <div class="segment-bar">
-          <span class="seg seg-algo">$argon2id</span>
-          <span>$</span>
-          <span class="seg seg-cost">v=19</span>
-          <span>$</span>
-          <span class="seg seg-cost">m=65536,t=3,p=4</span>
-          <span>$</span>
-          <span class="seg seg-salt">${salt}</span>
-          <span>$</span>
-          <span class="seg seg-hash">${digest}</span>
-        </div>
-        <div style="font-size:0.78rem; color:var(--text-muted); margin-top:0.35rem; line-height:1.45;">
-          • <span style="color:#14532d; font-weight:bold;">$argon2id</span>: Algoritmo híbrido | 
-          • <span style="color:#1e3a8a; font-weight:bold;">v=19</span>: Versão formal | 
-          • <span style="color:#1e3a8a; font-weight:bold;">m=65536, t=3, p=4</span>: Consome <strong>64 MB de RAM</strong>, 3 iterações, 4 threads | 
-          • <span style="background:#fef08a; font-weight:bold;">${salt}</span>: Salt Base64 | 
-          • <span style="color:#581c87; font-weight:bold;">${digest}</span>: Hash gerado
-        </div>
-      `;
-    }
-
-    // ==========================================
-    // LAB 2: WEB CRYPTO AES-256-GCM
-    // ==========================================
-    let lab2Key = null;
-    let lab2Iv = null;
-    let lab2FullBuffer = null;
+    // ============================================================
+    // LAB 2: AES-256-GCM real (Web Crypto API)
+    // ============================================================
+    let lab2Key = null, lab2Iv = null, lab2FullBuffer = null;
 
     function buf2hex(buffer) {
-      return Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
+      return Array.from(new Uint8Array(buffer), x => x.toString(16).padStart(2, '0')).join('');
     }
 
     async function executeLab2Encrypt() {
       const text = document.getElementById('lab2-plaintext').value;
-      if (!text) return;
+      const out = document.getElementById('lab2-output');
+      if (!text) { out.textContent = 'Digite um dado para cifrar.'; return; }
+      if (!window.crypto || !crypto.subtle) { out.textContent = 'Web Crypto indisponível neste navegador (use HTTPS ou localhost).'; return; }
 
-      lab2Key = await window.crypto.subtle.generateKey(
-        { name: "AES-GCM", length: 256 },
-        true,
-        ["encrypt", "decrypt"]
-      );
-
-      lab2Iv = window.crypto.getRandomValues(new Uint8Array(12));
+      lab2Key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+      lab2Iv = crypto.getRandomValues(new Uint8Array(12));
       const encoded = new TextEncoder().encode(text);
-
-      const cipherBuffer = await window.crypto.subtle.encrypt(
-        { name: "AES-GCM", iv: lab2Iv, tagLength: 128 },
-        lab2Key,
-        encoded
-      );
+      const cipherBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: lab2Iv, tagLength: 128 }, lab2Key, encoded);
 
       lab2FullBuffer = new Uint8Array(cipherBuffer);
       const tagOffset = lab2FullBuffer.length - 16;
-      const cipherBytes = lab2FullBuffer.slice(0, tagOffset);
-      const tagBytes = lab2FullBuffer.slice(tagOffset);
-
       const ivHex = buf2hex(lab2Iv);
-      const cipherHex = buf2hex(cipherBytes);
-      const tagHex = buf2hex(tagBytes);
+      const cipherHex = buf2hex(lab2FullBuffer.slice(0, tagOffset));
+      const tagHex = buf2hex(lab2FullBuffer.slice(tagOffset));
 
-      document.getElementById('lab2-output').innerHTML = `
-        <span style="color:var(--accent-emerald); font-weight:bold;">✓ Operação Executada com Sucesso (AES-256-GCM)</span><br>
-        • Texto Cifrado Gerado: <code>${cipherHex.slice(0, 32)}...</code> (${cipherBytes.length} bytes)<br>
-        • Authentication Tag Calculada: <code>${tagHex}</code> (16 bytes)
-      `;
+      out.innerHTML = `
+        <strong style="color:var(--accent-emerald);">Cifrado com AES-256-GCM.</strong><br>
+        Texto original: ${encoded.length} bytes. Texto cifrado: ${tagOffset} bytes. Tag: 16 bytes.`;
 
       document.getElementById('lab2-segment-display').innerHTML = `
-        <span class="seg seg-iv">${ivHex}</span>
-        <span>:</span>
-        <span class="seg seg-hash">${cipherHex.slice(0, 24)}...</span>
-        <span>:</span>
-        <span class="seg seg-tag">${tagHex}</span>
-      `;
+        <span class="seg seg-iv">${ivHex}</span><span>:</span>
+        <span class="seg seg-hash">${cipherHex}</span><span>:</span>
+        <span class="seg seg-tag">${tagHex}</span>`;
 
       document.getElementById('btn-lab2-read').disabled = false;
       document.getElementById('btn-lab2-attack').disabled = false;
@@ -1199,519 +1140,311 @@
     async function executeLab2Decrypt(tamper) {
       const out = document.getElementById('lab2-output');
       try {
-        let bufferToDecrypt = lab2FullBuffer.slice();
-        if (tamper) {
-          bufferToDecrypt[0] ^= 0xFF; // Inverte 1 bit no primeiro byte
-        }
-
-        const dec = await window.crypto.subtle.decrypt(
-          { name: "AES-GCM", iv: lab2Iv, tagLength: 128 },
-          lab2Key,
-          bufferToDecrypt
-        );
-
-        const recovered = new TextDecoder().decode(dec);
+        const data = lab2FullBuffer.slice();
+        if (tamper) data[0] ^= 0xFF; // altera 1 byte do texto cifrado, como um invasor com acesso ao banco
+        const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: lab2Iv, tagLength: 128 }, lab2Key, data);
         out.innerHTML = `
-          <span style="color:var(--accent-emerald); font-weight:bold;">✓ Sucesso na Leitura do Registro!</span><br>
-          Conteúdo íntegro recuperado: <code>${recovered}</code><br>
-          <em>A Authentication Tag validou matematicamente a autenticidade dos dados.</em>
-        `;
+          <strong style="color:var(--accent-emerald);">Leitura aceita.</strong>
+          Conteúdo recuperado: <code>${escapeHtml(new TextDecoder().decode(dec))}</code><br>
+          A tag conferiu com o texto cifrado.`;
       } catch (e) {
         out.innerHTML = `
-          <span style="color:var(--accent-rose); font-weight:bold;">🚨 REJEIÇÃO CRIPTOGRÁFICA DE SEGURANÇA!</span><br>
-          <strong>Falha de Integridade:</strong> <code>${e.name || "OperationError"}</code>.<br>
-          <em>A Authentication Tag acusou adulteração de dados no banco. O AES-GCM abortou a decifragem e barrou o consumo de conteúdo fraudado.</em>
-        `;
+          <strong style="color:var(--accent-rose);">Leitura recusada.</strong>
+          A tag não confere com o texto cifrado (${escapeHtml(e.name || 'OperationError')}).<br>
+          O GCM detectou a alteração e não entregou nenhum dado.`;
       }
     }
 
-    // ==========================================
-    // CANVAS DO TUX (SLIDE 4)
-    // ==========================================
-    function drawTuxCanvases() {
-      const cOrig = document.getElementById('canvas-original');
-      const cEcb = document.getElementById('canvas-ecb');
-      const cGcm = document.getElementById('canvas-gcm');
-      if (!cOrig || !cEcb || !cGcm) return;
+    // ============================================================
+    // SLIDE 4: pinguim cifrado com AES real
+    // ECB real: o Web Crypto não expõe ECB, mas AES-CBC com IV zerado sobre UM bloco
+    // de 16 bytes é idêntico a ECB; usamos só os 16 primeiros bytes de cada saída.
+    // ============================================================
+    let tuxDrawn = false;
+    function paintGray(canvas, gray, N) {
+      const ctx = canvas.getContext('2d');
+      const img = ctx.createImageData(N, N);
+      for (let i = 0; i < N * N; i++) {
+        img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = gray[i];
+        img.data[i * 4 + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+    }
 
-      const ctxO = cOrig.getContext('2d');
-      const ctxE = cEcb.getContext('2d');
-      const ctxG = cGcm.getContext('2d');
+    async function drawTuxCanvases() {
+      if (tuxDrawn) return;
+      tuxDrawn = true;
+      const N = 144; // 144 = 9 blocos de 16 bytes por linha
+      const off = document.createElement('canvas');
+      off.width = N; off.height = N;
+      const o = off.getContext('2d');
+      o.imageSmoothingEnabled = false;
+      o.fillStyle = '#ffffff'; o.fillRect(0, 0, N, N);
 
-      ctxO.fillStyle = "#ffffff";
-      ctxO.fillRect(0, 0, 96, 106);
+      o.fillStyle = '#000000';
+      o.beginPath(); o.ellipse(72, 78, 46, 58, 0, 0, Math.PI * 2); o.fill();
+      o.beginPath(); o.ellipse(30, 92, 11, 30, 0.35, 0, Math.PI * 2); o.fill();
+      o.beginPath(); o.ellipse(114, 92, 11, 30, -0.35, 0, Math.PI * 2); o.fill();
+      o.fillStyle = '#ffffff';
+      o.beginPath(); o.ellipse(72, 92, 29, 40, 0, 0, Math.PI * 2); o.fill();
+      o.beginPath(); o.arc(58, 42, 8, 0, Math.PI * 2); o.arc(86, 42, 8, 0, Math.PI * 2); o.fill();
+      o.fillStyle = '#000000';
+      o.beginPath(); o.arc(60, 43, 3.5, 0, Math.PI * 2); o.arc(84, 43, 3.5, 0, Math.PI * 2); o.fill();
+      o.fillStyle = '#f59e0b';
+      o.beginPath(); o.moveTo(62, 54); o.lineTo(82, 54); o.lineTo(72, 66); o.closePath(); o.fill();
+      o.beginPath(); o.ellipse(52, 136, 16, 5, 0, 0, Math.PI * 2); o.ellipse(92, 136, 16, 5, 0, 0, Math.PI * 2); o.fill();
 
-      // Pinguim
-      ctxO.fillStyle = "#0f172a";
-      ctxO.beginPath();
-      ctxO.ellipse(48, 58, 30, 38, 0, 0, Math.PI * 2);
-      ctxO.fill();
+      // reduz a poucos tons chapados (sem suavização), como num bitmap simples
+      const px = o.getImageData(0, 0, N, N).data;
+      const gray = new Uint8Array(N * N);
+      for (let i = 0; i < N * N; i++) {
+        const l = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2];
+        gray[i] = l < 70 ? 20 : l < 135 ? 90 : l < 215 ? 170 : 240;
+      }
+      paintGray(document.getElementById('canvas-original'), gray, N);
 
-      ctxO.fillStyle = "#ffffff";
-      ctxO.beginPath();
-      ctxO.ellipse(48, 63, 19, 25, 0, 0, Math.PI * 2);
-      ctxO.fill();
-
-      ctxO.fillStyle = "#ffffff";
-      ctxO.beginPath();
-      ctxO.arc(41, 37, 5, 0, Math.PI * 2);
-      ctxO.arc(55, 37, 5, 0, Math.PI * 2);
-      ctxO.fill();
-      ctxO.fillStyle = "#000000";
-      ctxO.beginPath();
-      ctxO.arc(42, 37, 2.5, 0, Math.PI * 2);
-      ctxO.arc(54, 37, 2.5, 0, Math.PI * 2);
-      ctxO.fill();
-
-      ctxO.fillStyle = "#f59e0b";
-      ctxO.beginPath();
-      ctxO.moveTo(43, 44);
-      ctxO.lineTo(53, 44);
-      ctxO.lineTo(48, 52);
-      ctxO.closePath();
-      ctxO.fill();
-
-      // ECB Simulation
-      const imgData = ctxO.getImageData(0, 0, 96, 106);
-      const ecbData = ctxE.createImageData(96, 106);
-
-      for (let y = 0; y < 106; y += 4) {
-        for (let x = 0; x < 96; x += 4) {
-          const idx = (y * 96 + x) * 4;
-          const r = imgData.data[idx];
-          const isDark = (r < 80);
-          const isWhite = (r > 200);
-
-          for (let dy = 0; dy < 4; dy++) {
-            for (let dx = 0; dx < 4; dx++) {
-              const targetIdx = ((y + dy) * 96 + (x + dx)) * 4;
-              if (isDark) {
-                ecbData.data[targetIdx] = 45 + ((x^y) % 45);
-                ecbData.data[targetIdx+1] = 45 + ((x^y) % 45);
-                ecbData.data[targetIdx+2] = 55 + ((x^y) % 45);
-              } else if (isWhite) {
-                ecbData.data[targetIdx] = 210 + ((x^y) % 25);
-                ecbData.data[targetIdx+1] = 210 + ((x^y) % 25);
-                ecbData.data[targetIdx+2] = 215 + ((x^y) % 25);
-              } else {
-                ecbData.data[targetIdx] = 130 + ((x*y) % 40);
-                ecbData.data[targetIdx+1] = 120 + ((x*y) % 40);
-                ecbData.data[targetIdx+2] = 100 + ((x*y) % 40);
-              }
-              ecbData.data[targetIdx+3] = 255;
-            }
-          }
+      try {
+        const ecbKey = await crypto.subtle.generateKey({ name: 'AES-CBC', length: 128 }, false, ['encrypt']);
+        const zeroIv = new Uint8Array(16);
+        const ecb = new Uint8Array(N * N);
+        for (let b = 0; b < N * N; b += 16) {
+          const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-CBC', iv: zeroIv }, ecbKey, gray.subarray(b, b + 16)));
+          ecb.set(ct.subarray(0, 16), b);
         }
+        paintGray(document.getElementById('canvas-ecb'), ecb, N);
+
+        const gcmKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt']);
+        const gcm = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: crypto.getRandomValues(new Uint8Array(12)) }, gcmKey, gray));
+        paintGray(document.getElementById('canvas-gcm'), gcm.subarray(0, N * N), N);
+      } catch (e) {
+        tuxDrawn = false;
       }
-      ctxE.putImageData(ecbData, 0, 0);
+    }
 
-      // GCM Simulation (Pure Noise)
-      const gcmData = ctxG.createImageData(96, 106);
-      for (let i = 0; i < gcmData.data.length; i += 4) {
-        const val = Math.floor(Math.random() * 256);
-        gcmData.data[i] = val;
-        gcmData.data[i+1] = val;
-        gcmData.data[i+2] = val;
-        gcmData.data[i+3] = 255;
+    // ============================================================
+    // SLIDE 7: diagrama animado do Envelope Encryption
+    // ============================================================
+    const KW = 1000, KH = 330;
+    const C = { kek: '#6d28d9', clean: '#047857', enc: '#b45309', data: '#1d4ed8', meta: '#475569', ink: '#0f172a', line: '#1e293b', warn: '#b91c1c' };
+    const BOX = {
+      hsm:  { x: 15,  y: 15, w: 205, h: 300 },
+      app:  { x: 445, y: 15, w: 170, h: 300 },
+      db:   { x: 805, y: 15, w: 180, h: 300 }
+    };
+    const LANE = { reqY: 105, cleanY: 165, encY: 225, dataY: 165, wEncY: 225 };
+    const GAP1 = { a: BOX.hsm.x + BOX.hsm.w, b: BOX.app.x };   // KMS <-> backend
+    const GAP2 = { a: BOX.app.x + BOX.app.w, b: BOX.db.x };    // backend <-> banco
+
+    const KMS_TEXT = [
+      'Clique em "Próxima etapa" para percorrer a escrita e a leitura de um dado protegido.',
+      '<strong>Etapa 1, escrita:</strong> o backend pede uma chave de dados ao KMS, com autenticação.',
+      '<strong>Etapa 2, escrita:</strong> o KMS devolve a DEK de duas formas: em texto limpo (só para uso imediato na RAM) e cifrada pela KEK. A KEK não sai do HSM.',
+      '<strong>Etapa 3, escrita:</strong> o backend cifra o dado localmente com AES-GCM e apaga a DEK limpa da memória.',
+      '<strong>Etapa 4, escrita:</strong> o banco recebe o dado cifrado, IV, tag e a DEK cifrada. Sem acesso ao KMS, esse registro não abre.',
+      '<strong>Etapa 5, leitura:</strong> o backend lê o registro, manda a DEK cifrada ao KMS, recebe a DEK limpa, decifra o dado e descarta a chave de novo.'
+    ];
+
+    // pacotes por etapa: de (x,y) a (x,y), com atraso e duração em ms
+    function kmsPackets(step) {
+      const gx1 = [GAP1.a + 58, GAP1.b - 58];
+      const gx2 = [GAP2.a + 58, GAP2.b - 58];
+      const L = (xs, y, rev) => rev ? { x1: xs[1], x2: xs[0], y } : { x1: xs[0], x2: xs[1], y };
+      switch (step) {
+        case 1: return [{ ...L(gx1, LANE.reqY, true), chip: ['pede DEK', C.meta, '#fff'], delay: 0, dur: 1100 }];
+        case 2: return [
+          { ...L(gx1, LANE.cleanY, false), chip: ['DEK limpa', C.clean, '#fff'], delay: 0, dur: 1100 },
+          { ...L(gx1, LANE.encY, false), chip: ['DEK cifrada', C.enc, '#fff'], delay: 250, dur: 1100 }
+        ];
+        case 3: return [];
+        case 4: return [
+          { ...L(gx2, LANE.dataY, false), chip: ['dado cifrado', C.data, '#fff'], delay: 0, dur: 1100 },
+          { ...L(gx2, LANE.wEncY, false), chip: ['DEK cifrada', C.enc, '#fff'], delay: 250, dur: 1100 }
+        ];
+        case 5: return [
+          { ...L(gx2, LANE.dataY, true), chip: ['dado cifrado', C.data, '#fff'], delay: 0, dur: 900 },
+          { ...L(gx2, LANE.wEncY, true), chip: ['DEK cifrada', C.enc, '#fff'], delay: 150, dur: 900 },
+          { ...L(gx1, LANE.reqY, true), chip: ['DEK cifrada', C.enc, '#fff'], delay: 1150, dur: 1000 },
+          { ...L(gx1, LANE.cleanY, false), chip: ['DEK limpa', C.clean, '#fff'], delay: 2250, dur: 1000 }
+        ];
+        default: return [];
       }
-      ctxG.putImageData(gcmData, 0, 0);
     }
 
-    // ==========================================
-    // CANVAS DINÂMICO DO KMS COM HARDWARE (SLIDE 7)
-    // ==========================================
-    let kmsStep = 0;
-    function initKmsCanvas() {
-      drawKmsDiagram(kmsStep);
+    const kms = { step: 0, anim: null };
+    const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function fitCanvas(canvas, W, H) {
+      const dpr = window.devicePixelRatio || 1;
+      const cssW = canvas.clientWidth || W;
+      const scale = cssW / W;
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(H * scale * dpr);
+      canvas.style.height = (H * scale) + 'px';
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(canvas.width / W, 0, 0, canvas.width / W, 0, 0);
+      return ctx;
     }
 
-    function runKmsStep() {
-      kmsStep = (kmsStep + 1) % 4;
-      drawKmsDiagram(kmsStep);
+    function chip(ctx, text, cx, cy, bg, fg, opt = {}) {
+      ctx.font = `700 ${opt.size || 14}px ui-monospace, "Cascadia Code", Menlo, Consolas, monospace`;
+      const w = Math.ceil(ctx.measureText(text).width) + 20, h = 28;
+      const x = Math.round(cx - w / 2), y = Math.round(cy - h / 2);
+      ctx.fillStyle = 'rgba(30,41,59,0.85)'; ctx.fillRect(x + 2, y + 2, w, h);
+      ctx.fillStyle = bg; ctx.fillRect(x, y, w, h);
+      ctx.strokeStyle = C.line; ctx.lineWidth = 2;
+      if (opt.dashed) ctx.setLineDash([5, 4]);
+      ctx.strokeRect(x, y, w, h);
+      ctx.setLineDash([]);
+      ctx.fillStyle = fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(text, cx, cy + 1);
+      if (opt.strike) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x + 4, cy); ctx.lineTo(x + w - 4, cy); ctx.stroke(); }
+      return w;
     }
 
-    function resetKmsDiagram() {
-      kmsStep = 0;
-      drawKmsDiagram(0);
+    function label(ctx, text, x, y, color, size = 13, bold = false, align = 'center') {
+      ctx.font = `${bold ? 700 : 500} ${size}px -apple-system, "Segoe UI", Roboto, sans-serif`;
+      ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'alphabetic';
+      ctx.fillText(text, x, y);
     }
 
-    function drawKmsDiagram(step) {
+    function panelBox(ctx, b, title, sub, fill, accent) {
+      ctx.fillStyle = 'rgba(30,41,59,0.85)'; ctx.fillRect(b.x + 3, b.y + 3, b.w, b.h);
+      ctx.fillStyle = fill; ctx.fillRect(b.x, b.y, b.w, b.h);
+      ctx.strokeStyle = C.line; ctx.lineWidth = 2; ctx.strokeRect(b.x, b.y, b.w, b.h);
+      ctx.fillStyle = accent; ctx.fillRect(b.x, b.y, b.w, 6);
+      label(ctx, title, b.x + b.w / 2, b.y + 32, C.ink, 15, true);
+      label(ctx, sub, b.x + b.w / 2, b.y + 52, '#3f4b5f', 13);
+    }
+
+    function lane(ctx, xa, xb, y, color, dir) {
+      ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3;
+      ctx.setLineDash([7, 5]);
+      ctx.beginPath(); ctx.moveTo(xa + 6, y); ctx.lineTo(xb - 6, y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      if (dir > 0) { ctx.moveTo(xb - 4, y); ctx.lineTo(xb - 16, y - 7); ctx.lineTo(xb - 16, y + 7); }
+      else { ctx.moveTo(xa + 4, y); ctx.lineTo(xa + 16, y - 7); ctx.lineTo(xa + 16, y + 7); }
+      ctx.closePath(); ctx.fill();
+    }
+
+    // shown = etapa cujo estado final aparece nas caixas; step = etapa cujas linhas aparecem
+    function drawKms(elapsed) {
       const canvas = document.getElementById('canvas-kms');
       if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, 1000, 230);
+      const ctx = fitCanvas(canvas, KW, KH);
+      ctx.clearRect(0, 0, KW, KH);
+      const animating = !!kms.anim;
+      const shown = animating ? kms.step - 1 : kms.step;
+      const step = kms.step;
 
-      // Estilo de base
-      ctx.font = "bold 13px ui-monospace, monospace";
-      ctx.lineWidth = 1.5;
+      // HSM / KMS
+      const h = BOX.hsm;
+      panelBox(ctx, h, 'KMS / HSM', 'hardware blindado', '#f5f3ff', C.kek);
+      [0, 1, 2].forEach(i => { ctx.fillStyle = i === 0 ? '#16a34a' : '#94a3b8'; ctx.fillRect(h.x + h.w - 54 + i * 14, h.y + 16, 8, 8); });
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(h.x + 22, h.y + 78, h.w - 44, 130);
+      ctx.strokeStyle = C.line; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.strokeRect(h.x + 22, h.y + 78, h.w - 44, 130); ctx.setLineDash([]);
+      label(ctx, 'cofre interno', h.x + h.w / 2, h.y + 98, '#3f4b5f', 12);
+      chip(ctx, 'KEK', h.x + h.w / 2, h.y + 140, C.kek, '#fff', { size: 16 });
+      label(ctx, 'chave mestra', h.x + h.w / 2, h.y + 172, C.ink, 13, true);
+      label(ctx, 'não sai do hardware', h.x + h.w / 2, h.y + 192, C.warn, 12, true);
+      label(ctx, 'cria a DEK sob demanda', h.x + h.w / 2, h.y + 244, '#3f4b5f', 12);
+      label(ctx, 'e cifra/decifra DEKs', h.x + h.w / 2, h.y + 262, '#3f4b5f', 12);
 
-      // 1. Box Hardware HSM / KMS (Esquerda)
-      ctx.fillStyle = "#f5f3ff";
-      ctx.strokeStyle = "#7c3aed";
-      ctx.strokeRect(40, 30, 240, 160);
-      ctx.fillRect(40, 30, 240, 160);
+      // Backend
+      const a = BOX.app;
+      panelBox(ctx, a, 'BACKEND', 'RAM do servidor', '#eff6ff', C.data);
+      label(ctx, 'chave na memória', a.x + a.w / 2, a.y + 88, '#3f4b5f', 12);
+      ctx.strokeStyle = C.line; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
+      ctx.strokeRect(a.x + 16, a.y + 98, a.w - 32, 48); ctx.setLineDash([]);
+      const keyLive = (shown === 2) || (shown === 5 && !animating);
+      if (keyLive) chip(ctx, 'DEK limpa', a.x + a.w / 2, a.y + 122, C.clean, '#fff');
+      else if (shown === 3 || shown === 4) {
+        chip(ctx, 'DEK limpa', a.x + a.w / 2, a.y + 116, '#94a3b8', '#fff', { strike: true, dashed: true });
+        label(ctx, 'apagada da RAM', a.x + a.w / 2, a.y + 140, C.warn, 12, true);
+      } else label(ctx, 'vazio', a.x + a.w / 2, a.y + 127, '#566074', 13);
 
-      ctx.fillStyle = "#7c3aed";
-      ctx.fillText("🏛️ HARDWARE HSM / KMS", 60, 55);
-      ctx.font = "11px ui-monospace, monospace";
-      ctx.fillStyle = "#475569";
-      ctx.fillText("Módulo Criptográfico Físico", 60, 72);
+      label(ctx, 'dado', a.x + a.w / 2, a.y + 188, '#3f4b5f', 12);
+      ctx.strokeRect(a.x + 16, a.y + 198, a.w - 32, 48);
+      if (shown === 3 || shown === 4) chip(ctx, 'dado cifrado', a.x + a.w / 2, a.y + 222, C.data, '#fff');
+      else if (shown === 5 && !animating) chip(ctx, 'dado: CPF', a.x + a.w / 2, a.y + 222, '#334155', '#fff');
+      else if (shown === 2) chip(ctx, 'dado: CPF', a.x + a.w / 2, a.y + 222, '#334155', '#fff');
+      else if (shown === 0 || shown === 1) chip(ctx, 'dado: CPF', a.x + a.w / 2, a.y + 222, '#334155', '#fff');
+      else label(ctx, 'lido do banco', a.x + a.w / 2, a.y + 227, '#566074', 13);
+      if (shown === 3) label(ctx, 'cifrou com AES-GCM', a.x + a.w / 2, a.y + 272, C.data, 12, true);
+      if (shown === 5 && !animating) label(ctx, 'decifra com AES-GCM', a.x + a.w / 2, a.y + 272, C.data, 12, true);
 
-      // Caixa da KEK trancada dentro do HSM
-      ctx.fillStyle = "#ffffff";
-      ctx.strokeStyle = "#1e293b";
-      ctx.strokeRect(60, 90, 200, 50);
-      ctx.fillRect(60, 90, 200, 50);
-      ctx.fillStyle = "#0f172a";
-      ctx.font = "bold 12px ui-monospace, monospace";
-      ctx.fillText("🔒 KEK (Chave Mestra)", 75, 115);
-      ctx.font = "10px ui-monospace, monospace";
-      ctx.fillStyle = "#e11d48";
-      ctx.fillText("ESTRITAMENTE NÃO-EXPORTÁVEL", 75, 130);
+      // Banco
+      const d = BOX.db;
+      panelBox(ctx, d, 'BANCO DE DADOS', 'armazenamento', '#ecfdf5', C.clean);
+      if (shown >= 4) {
+        chip(ctx, 'dado cifrado', d.x + d.w / 2, d.y + 112, C.data, '#fff');
+        chip(ctx, 'IV + tag', d.x + d.w / 2, d.y + 160, '#475569', '#fff');
+        chip(ctx, 'DEK cifrada', d.x + d.w / 2, d.y + 208, C.enc, '#fff');
+        label(ctx, 'registro no banco', d.x + d.w / 2, d.y + 262, C.ink, 12, true);
+        label(ctx, 'sem a KEK, não abre', d.x + d.w / 2, d.y + 280, C.warn, 12, true);
+      } else label(ctx, 'sem registros ainda', d.x + d.w / 2, d.y + 160, '#566074', 13);
 
-      // 2. Box Backend RAM Efêmera (Centro)
-      ctx.fillStyle = "#eff6ff";
-      ctx.strokeStyle = "#2563eb";
-      ctx.strokeRect(380, 30, 260, 160);
-      ctx.fillRect(380, 30, 260, 160);
+      // linhas de contexto da etapa atual
+      const lanesFor = {
+        1: [[GAP1, LANE.reqY, '#475569', -1, 'pede uma DEK']],
+        2: [[GAP1, LANE.cleanY, C.clean, 1, 'DEK limpa'], [GAP1, LANE.encY, C.enc, 1, 'DEK cifrada']],
+        4: [[GAP2, LANE.dataY, C.data, 1, 'grava'], [GAP2, LANE.wEncY, C.enc, 1, 'grava']],
+        5: [[GAP2, LANE.dataY, C.data, -1, 'lê'], [GAP2, LANE.wEncY, C.enc, -1, 'lê'],
+            [GAP1, LANE.reqY, C.enc, -1, 'envia DEK cifrada'], [GAP1, LANE.cleanY, C.clean, 1, 'recebe DEK limpa']]
+      }[step] || [];
+      lanesFor.forEach(([g, y, col, dir, txt]) => {
+        lane(ctx, g.a, g.b, y, col, dir);
+        label(ctx, txt, (g.a + g.b) / 2, y - 24, C.ink, 12, true);
+      });
 
-      ctx.fillStyle = "#2563eb";
-      ctx.font = "bold 13px ui-monospace, monospace";
-      ctx.fillText("⚡ BACKEND (RAM EFÊMERA)", 400, 55);
-      ctx.font = "11px ui-monospace, monospace";
-      ctx.fillStyle = "#475569";
-      ctx.fillText("Servidor de Aplicação / API", 400, 72);
-
-      // Slot de Chave na RAM
-      ctx.fillStyle = "#ffffff";
-      ctx.strokeStyle = "#1e293b";
-      ctx.strokeRect(400, 90, 220, 50);
-      ctx.fillRect(400, 90, 220, 50);
-
-      if (step >= 2) {
-        ctx.fillStyle = "#059669";
-        ctx.font = "bold 12px ui-monospace, monospace";
-        ctx.fillText("🔑 DEK em Texto Limpo", 415, 112);
-        if (step === 3) {
-          ctx.fillStyle = "#e11d48";
-          ctx.font = "bold 11px ui-monospace, monospace";
-          ctx.fillText("🔥 DESTRUÍDA DA RAM!", 415, 130);
-        } else {
-          ctx.fillStyle = "#475569";
-          ctx.font = "10px ui-monospace, monospace";
-          ctx.fillText("Cifra local em < 1ms", 415, 130);
-        }
-      } else {
-        ctx.fillStyle = "#94a3b8";
-        ctx.font = "italic 11px ui-monospace, monospace";
-        ctx.fillText("[ Memória Vazia ]", 450, 120);
-      }
-
-      // 3. Box Banco de Dados (Direita)
-      ctx.fillStyle = "#f0fdf4";
-      ctx.strokeStyle = "#059669";
-      ctx.strokeRect(740, 30, 220, 160);
-      ctx.fillRect(740, 30, 220, 160);
-
-      ctx.fillStyle = "#059669";
-      ctx.font = "bold 13px ui-monospace, monospace";
-      ctx.fillText("🗄️ BANCO DE DADOS", 760, 55);
-      ctx.font = "11px ui-monospace, monospace";
-      ctx.fillStyle = "#475569";
-      ctx.fillText("Repositório Persistente", 760, 72);
-
-      // Caixa de Envelope no banco
-      ctx.fillStyle = "#ffffff";
-      ctx.strokeStyle = "#1e293b";
-      ctx.strokeRect(755, 90, 190, 80);
-      ctx.fillRect(755, 90, 190, 80);
-
-      if (step === 3) {
-        ctx.fillStyle = "#0f172a";
-        ctx.font = "bold 10px ui-monospace, monospace";
-        ctx.fillText("✉️ REGISTRO NOVO:", 765, 110);
-        ctx.fillStyle = "#2563eb";
-        ctx.fillText("• Dado Cifrado (AES)", 765, 125);
-        ctx.fillStyle = "#d97706";
-        ctx.fillText("• IV + Auth Tag", 765, 140);
-        ctx.fillStyle = "#7c3aed";
-        ctx.fillText("• DEK Cifrada (Envelope)", 765, 155);
-      } else {
-        ctx.fillStyle = "#94a3b8";
-        ctx.font = "italic 11px ui-monospace, monospace";
-        ctx.fillText("Aguardando gravação...", 765, 135);
-      }
-
-      // Setas e Animações de Fluxo baseadas no step
-      const statusBox = document.getElementById('kms-status-box');
-
-      if (step === 1) {
-        // Seta Backend -> KMS (Solicita Chave)
-        drawArrow(ctx, 400, 160, 280, 160, "#2563eb", "1. Chamada API: Solicita DEK");
-        statusBox.innerHTML = "<strong>Etapa 1:</strong> O Backend envia chamada autenticada ao KMS solicitando uma nova chave de dados.";
-      } else if (step === 2) {
-        // Seta KMS -> Backend (Devolve DEK limpa + DEK cifrada)
-        drawArrow(ctx, 280, 100, 380, 100, "#059669", "2. Retorna: DEK limpa + DEK Cifrada");
-        statusBox.innerHTML = "<strong>Etapa 2:</strong> O KMS gera a DEK. Devolve a DEK pura na RAM efêmera e a DEK lacrada pela KEK.";
-      } else if (step === 3) {
-        // Seta Backend -> Banco (Gravação do envelope)
-        drawArrow(ctx, 640, 115, 740, 115, "#059669", "3. Gravação");
-        statusBox.innerHTML = "<strong>Etapa 3:</strong> Backend cifra com AES-GCM, apaga a chave da RAM e salva no banco: <code>Dado Cifrado + DEK Lacrada</code>!";
-      } else {
-        statusBox.innerHTML = "<strong>Início do Diagrama:</strong> Clique no botão acima para iniciar a animação interativa.";
+      // pacotes em movimento
+      if (animating) {
+        kms.anim.pk.forEach(p => {
+          const t = Math.max(0, Math.min(1, (elapsed - p.delay) / p.dur));
+          if (t <= 0 || t >= 1) return;
+          const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+          chip(ctx, p.chip[0], p.x1 + (p.x2 - p.x1) * e, p.y, p.chip[1], p.chip[2], { size: 13 });
+        });
       }
     }
 
-    function drawArrow(ctx, fromx, fromy, tox, toy, color, label) {
-      const headlen = 8;
-      const angle = Math.atan2(toy - fromy, tox - fromx);
-      ctx.strokeStyle = color;
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(fromx, fromy);
-      ctx.lineTo(tox, toy);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(tox, toy);
-      ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
-      ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
-      ctx.closePath();
-      ctx.fill();
-
-      if (label) {
-        ctx.font = "bold 11px ui-monospace, monospace";
-        ctx.fillText(label, (fromx + tox)/2 - 40, fromy - 8);
-      }
+    function kmsFrame(now) {
+      const a = kms.anim;
+      if (!a) return;
+      const el = now - a.t0;
+      if (el >= a.total) { kms.anim = null; drawKms(0); kmsButtons(); return; }
+      drawKms(el);
+      requestAnimationFrame(kmsFrame);
     }
 
-    // ==========================================
-    // CANVAS DINÂMICO DIFFIE-HELLMAN (SLIDE 8)
-    // Linha Amarela, Partícula Azul -> Verde, Vermelho -> Laranja, União -> Marrom
-    // ==========================================
-    let dhAnimRunning = false;
-    function initDhCanvas() {
-      drawDhStatic();
+    function kmsButtons() {
+      document.getElementById('btn-kms-next').disabled = !!kms.anim || kms.step >= 5;
     }
 
-    function drawDhStatic() {
-      const canvas = document.getElementById('canvas-dh');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, 1000, 210);
-
-      // Node Cliente
-      ctx.fillStyle = "#eff6ff";
-      ctx.strokeStyle = "#1e293b";
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(50, 40, 180, 130);
-      ctx.fillRect(50, 40, 180, 130);
-      ctx.fillStyle = "#1e293b";
-      ctx.font = "bold 13px ui-monospace, monospace";
-      ctx.fillText("💻 CLIENTE", 95, 65);
-      ctx.font = "11px ui-monospace, monospace";
-      ctx.fillStyle = "#2563eb";
-      ctx.fillText("• Segredo Privado: AZUL", 65, 95);
-
-      // Node Servidor
-      ctx.fillStyle = "#fff5f5";
-      ctx.strokeRect(770, 40, 180, 130);
-      ctx.fillRect(770, 40, 180, 130);
-      ctx.fillStyle = "#1e293b";
-      ctx.font = "bold 13px ui-monospace, monospace";
-      ctx.fillText("🖥️ SERVIDOR", 815, 65);
-      ctx.font = "11px ui-monospace, monospace";
-      ctx.fillStyle = "#e11d48";
-      ctx.fillText("• Segredo Privado: VERMELHO", 780, 95);
-
-      // Linha Central Pública (Amarela)
-      ctx.strokeStyle = "#eab308";
-      ctx.lineWidth = 6;
-      ctx.beginPath();
-      ctx.moveTo(230, 105);
-      ctx.lineTo(770, 105);
-      ctx.stroke();
-
-      ctx.font = "bold 11px ui-monospace, monospace";
-      ctx.fillStyle = "#a16207";
-      ctx.fillText("CANAL PÚBLICO (BASE: AMARELO) - MONITORADO POR ATACANTE", 310, 85);
-      ctx.lineWidth = 1.5;
+    function kmsNext() {
+      if (kms.anim || kms.step >= 5) return;
+      kms.step++;
+      document.getElementById('kms-status-box').innerHTML = KMS_TEXT[kms.step];
+      const pk = kmsPackets(kms.step);
+      const total = reduceMotion() ? 0 : Math.max(900, ...pk.map(p => p.delay + p.dur)) + 150;
+      if (total === 0 || pk.length === 0) { drawKms(0); kmsButtons(); return; }
+      kms.anim = { t0: performance.now(), pk, total };
+      kmsButtons();
+      requestAnimationFrame(kmsFrame);
     }
 
-    function runDhAnimation() {
-      if (dhAnimRunning) return;
-      dhAnimRunning = true;
-      const canvas = document.getElementById('canvas-dh');
-      const ctx = canvas.getContext('2d');
-      const btn = document.getElementById('btn-dh-sim');
-      const status = document.getElementById('dh-status-text');
-      btn.disabled = true;
-
-      let progress = 0;
-      const startXClient = 230;
-      const endXClient = 770;
-      const startXServer = 770;
-      const endXServer = 230;
-
-      status.innerHTML = "<strong>Fase 1:</strong> Cliente combina Amarelo + Azul = <strong>Verde</strong>. Servidor combina Amarelo + Vermelho = <strong>Laranja</strong>. Ambos transmitem na linha amarela!";
-
-      function step() {
-        progress += 0.015;
-        drawDhStatic();
-
-        // Posições
-        const curXGreen = startXClient + (endXClient - startXClient) * progress;
-        const curXOrange = startXServer + (endXServer - startXServer) * progress;
-
-        // Desenha pacote Verde (do Cliente pro Servidor)
-        ctx.fillStyle = "#16a34a";
-        ctx.beginPath();
-        ctx.arc(curXGreen, 105, 10, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "#000";
-        ctx.stroke();
-        ctx.font = "bold 10px ui-monospace, monospace";
-        ctx.fillStyle = "#16a34a";
-        ctx.fillText("Verde", curXGreen - 15, 130);
-
-        // Desenha pacote Laranja (do Servidor pro Cliente)
-        ctx.fillStyle = "#ea580c";
-        ctx.beginPath();
-        ctx.arc(curXOrange, 105, 10, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "#000";
-        ctx.stroke();
-        ctx.fillStyle = "#ea580c";
-        ctx.fillText("Laranja", curXOrange - 20, 130);
-
-        if (progress < 1) {
-          requestAnimationFrame(step);
-        } else {
-          // Fase Final: Chegada e Derivação do Marrom
-          status.innerHTML = "<strong>Fase 2 (Concluída):</strong> Cliente junta Laranja com seu Azul secreto = <strong style='color:#78350f;'>MARROM</strong>. Servidor junta Verde com seu Vermelho secreto = <strong style='color:#78350f;'>MARROM</strong>! Ambos obtiveram a mesma chave sem expor o Marrom na rede!";
-
-          // Revela Marrom em ambos os lados
-          ctx.fillStyle = "#78350f";
-          ctx.strokeRect(65, 115, 150, 35);
-          ctx.fillRect(65, 115, 150, 35);
-          ctx.fillStyle = "#ffffff";
-          ctx.font = "bold 11px ui-monospace, monospace";
-          ctx.fillText("🔑 CHAVE: MARROM", 75, 137);
-
-          ctx.fillStyle = "#78350f";
-          ctx.strokeRect(785, 115, 150, 35);
-          ctx.fillRect(785, 115, 150, 35);
-          ctx.fillStyle = "#ffffff";
-          ctx.fillText("🔑 CHAVE: MARROM", 795, 137);
-
-          dhAnimRunning = false;
-          btn.disabled = false;
-        }
-      }
-      requestAnimationFrame(step);
+    function kmsReset() {
+      kms.anim = null;
+      kms.step = 0;
+      document.getElementById('kms-status-box').innerHTML = KMS_TEXT[0];
+      drawKms(0);
+      kmsButtons();
     }
 
-    // ==========================================
-    // CANVAS DOS CRACHÁS MTLS (SLIDE 9)
-    // ==========================================
-    function initBadgesCanvas() {
-      drawBadges(false);
-    }
-
-    function runBadgeAnimation() {
-      drawBadges(true);
-    }
-
-    function drawBadges(verified) {
-      const canvas = document.getElementById('canvas-badges');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, 1000, 190);
-      ctx.lineWidth = 1.5;
-
-      // Entidade A: Microsserviço de Pagamentos
-      ctx.fillStyle = "#eff6ff";
-      ctx.strokeStyle = "#1e293b";
-      ctx.strokeRect(80, 20, 260, 150);
-      ctx.fillRect(80, 20, 260, 150);
-      ctx.fillStyle = "#1e293b";
-      ctx.font = "bold 12px ui-monospace, monospace";
-      ctx.fillText("📦 MICROSSERVIÇO PAGAMENTOS", 100, 42);
-
-      // Crachá A
-      ctx.fillStyle = "#ffffff";
-      ctx.strokeStyle = "#2563eb";
-      ctx.strokeRect(100, 58, 220, 95);
-      ctx.fillRect(100, 58, 220, 95);
-      ctx.fillStyle = "#2563eb";
-      ctx.font = "bold 11px ui-monospace, monospace";
-      ctx.fillText("🪪 CERTIFICADO CLIENTE X.509", 110, 80);
-      ctx.font = "10px ui-monospace, monospace";
-      ctx.fillStyle = "#475569";
-      ctx.fillText("CN: payments.internal.svc", 110, 100);
-      ctx.fillText("Assinatura: CA Corporativa", 110, 116);
-      ctx.fillStyle = "#16a34a";
-      ctx.fillText("Status: Autêntico / Válido", 110, 135);
-
-      // Entidade B: Microsserviço de Saldo
-      ctx.fillStyle = "#f0fdf4";
-      ctx.strokeStyle = "#1e293b";
-      ctx.strokeRect(660, 20, 260, 150);
-      ctx.fillRect(660, 20, 260, 150);
-      ctx.fillStyle = "#1e293b";
-      ctx.font = "bold 12px ui-monospace, monospace";
-      ctx.fillText("🏦 MICROSSERVIÇO SALDO / CONTA", 680, 42);
-
-      // Crachá B
-      ctx.fillStyle = "#ffffff";
-      ctx.strokeStyle = "#059669";
-      ctx.strokeRect(680, 58, 220, 95);
-      ctx.fillRect(680, 58, 220, 95);
-      ctx.fillStyle = "#059669";
-      ctx.font = "bold 11px ui-monospace, monospace";
-      ctx.fillText("🪪 CERTIFICADO SERVIDOR X.509", 690, 80);
-      ctx.font = "10px ui-monospace, monospace";
-      ctx.fillStyle = "#475569";
-      ctx.fillText("CN: balance.internal.svc", 690, 100);
-      ctx.fillText("Assinatura: CA Corporativa", 690, 116);
-      ctx.fillStyle = "#16a34a";
-      ctx.fillText("Status: Autêntico / Válido", 690, 135);
-
-      // Feixe de Comunicação Mútua Central
-      if (verified) {
-        ctx.strokeStyle = "#16a34a";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(340, 105);
-        ctx.lineTo(660, 105);
-        ctx.stroke();
-
-        ctx.fillStyle = "#16a34a";
-        ctx.font = "bold 11px ui-monospace, monospace";
-        ctx.fillText("🤝 mTLS: VALIDAÇÃO MÚTUA APROVADA!", 385, 95);
-        ctx.font = "10px ui-monospace, monospace";
-        ctx.fillStyle = "#475569";
-        ctx.fillText("Túnel TCP/TLS Estabelecido com Sucesso", 390, 125);
-      } else {
-        ctx.strokeStyle = "#cbd5e1";
-        ctx.lineWidth = 2;
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.moveTo(340, 105);
-        ctx.lineTo(660, 105);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        ctx.fillStyle = "#64748b";
-        ctx.font = "11px ui-monospace, monospace";
-        ctx.fillText("Apresentando Crachás Criptográficos...", 395, 95);
-      }
-      ctx.lineWidth = 1.5;
-    }
+    window.addEventListener('resize', () => { if (currentSlide === 7) drawKms(0); });
 
     // Inicialização
     updateDeck();
-    generateDynamicBcrypt();
   </script>
 </body>
 </html>
