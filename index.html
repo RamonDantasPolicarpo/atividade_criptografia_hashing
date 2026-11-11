@@ -366,13 +366,16 @@
       padding: 0.6rem;
     }
     .tux-cell { text-align: center; font-family: var(--font-code); font-size: 0.82rem; font-weight: 700; }
+    .tux-cell img,
     .tux-cell canvas {
-      width: 168px;
-      height: 168px;
-      image-rendering: pixelated;
+      width: 140px;
+      height: 166px;
+      object-fit: contain;
+      image-rendering: auto;
       border: 1px solid var(--border-muted);
       display: block;
       margin: 0 auto 0.25rem;
+      background: #fff;
     }
 
     @media (max-width: 820px) {
@@ -574,12 +577,21 @@
 
         <div class="lab-box">
           <div class="lab-heading">
-            <span>Pinguim Tux: o mesmo desenho cifrado com AES-ECB e AES-GCM (cifra real do navegador)</span>
+            <span>Pinguim Tux: comparação visual do texto original, AES-ECB e AES-CBC</span>
           </div>
           <div class="tux-grid">
-            <div class="tux-cell"><canvas id="canvas-original" width="144" height="144" aria-label="Pinguim original"></canvas>Original</div>
-            <div class="tux-cell" style="color:var(--accent-rose);"><canvas id="canvas-ecb" width="144" height="144" aria-label="Pinguim cifrado em ECB, silhueta ainda visível"></canvas>AES-ECB: a silhueta aparece</div>
-            <div class="tux-cell" style="color:var(--accent-emerald);"><canvas id="canvas-gcm" width="144" height="144" aria-label="Pinguim cifrado em GCM, apenas ruído"></canvas>AES-GCM: só ruído</div>
+            <div class="tux-cell">
+              <img src="assets/Tux.png" alt="Pinguim Tux original" width="140" height="166">
+              Original
+            </div>
+            <div class="tux-cell" style="color:var(--accent-rose);">
+              <img src="assets/Tux_ecb.png" alt="Pinguim Tux cifrado em ECB, silhueta ainda visível" width="140" height="166">
+              AES-ECB: a silhueta aparece
+            </div>
+            <div class="tux-cell" style="color:var(--accent-emerald);">
+              <img src="assets/Tux_cbc.png" alt="Pinguim Tux cifrado em CBC, apenas ruído" width="140" height="166">
+              AES-CBC: só ruído
+            </div>
           </div>
         </div>
       </div>
@@ -957,7 +969,6 @@
       document.getElementById('btn-prev').disabled = currentSlide === 1;
       document.getElementById('btn-next').disabled = currentSlide === totalSlides;
 
-      if (currentSlide === 4) drawTuxCanvases();
       if (currentSlide === 7) requestAnimationFrame(() => drawKms(0));
     }
 
@@ -1152,72 +1163,6 @@
           <strong style="color:var(--accent-rose);">Leitura recusada.</strong>
           A tag não confere com o texto cifrado (${escapeHtml(e.name || 'OperationError')}).<br>
           O GCM detectou a alteração e não entregou nenhum dado.`;
-      }
-    }
-
-    // ============================================================
-    // SLIDE 4: pinguim cifrado com AES real
-    // ECB real: o Web Crypto não expõe ECB, mas AES-CBC com IV zerado sobre UM bloco
-    // de 16 bytes é idêntico a ECB; usamos só os 16 primeiros bytes de cada saída.
-    // ============================================================
-    let tuxDrawn = false;
-    function paintGray(canvas, gray, N) {
-      const ctx = canvas.getContext('2d');
-      const img = ctx.createImageData(N, N);
-      for (let i = 0; i < N * N; i++) {
-        img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = gray[i];
-        img.data[i * 4 + 3] = 255;
-      }
-      ctx.putImageData(img, 0, 0);
-    }
-
-    async function drawTuxCanvases() {
-      if (tuxDrawn) return;
-      tuxDrawn = true;
-      const N = 144; // 144 = 9 blocos de 16 bytes por linha
-      const off = document.createElement('canvas');
-      off.width = N; off.height = N;
-      const o = off.getContext('2d');
-      o.imageSmoothingEnabled = false;
-      o.fillStyle = '#ffffff'; o.fillRect(0, 0, N, N);
-
-      o.fillStyle = '#000000';
-      o.beginPath(); o.ellipse(72, 78, 46, 58, 0, 0, Math.PI * 2); o.fill();
-      o.beginPath(); o.ellipse(30, 92, 11, 30, 0.35, 0, Math.PI * 2); o.fill();
-      o.beginPath(); o.ellipse(114, 92, 11, 30, -0.35, 0, Math.PI * 2); o.fill();
-      o.fillStyle = '#ffffff';
-      o.beginPath(); o.ellipse(72, 92, 29, 40, 0, 0, Math.PI * 2); o.fill();
-      o.beginPath(); o.arc(58, 42, 8, 0, Math.PI * 2); o.arc(86, 42, 8, 0, Math.PI * 2); o.fill();
-      o.fillStyle = '#000000';
-      o.beginPath(); o.arc(60, 43, 3.5, 0, Math.PI * 2); o.arc(84, 43, 3.5, 0, Math.PI * 2); o.fill();
-      o.fillStyle = '#f59e0b';
-      o.beginPath(); o.moveTo(62, 54); o.lineTo(82, 54); o.lineTo(72, 66); o.closePath(); o.fill();
-      o.beginPath(); o.ellipse(52, 136, 16, 5, 0, 0, Math.PI * 2); o.ellipse(92, 136, 16, 5, 0, 0, Math.PI * 2); o.fill();
-
-      // reduz a poucos tons chapados (sem suavização), como num bitmap simples
-      const px = o.getImageData(0, 0, N, N).data;
-      const gray = new Uint8Array(N * N);
-      for (let i = 0; i < N * N; i++) {
-        const l = 0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2];
-        gray[i] = l < 70 ? 20 : l < 135 ? 90 : l < 215 ? 170 : 240;
-      }
-      paintGray(document.getElementById('canvas-original'), gray, N);
-
-      try {
-        const ecbKey = await crypto.subtle.generateKey({ name: 'AES-CBC', length: 128 }, false, ['encrypt']);
-        const zeroIv = new Uint8Array(16);
-        const ecb = new Uint8Array(N * N);
-        for (let b = 0; b < N * N; b += 16) {
-          const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-CBC', iv: zeroIv }, ecbKey, gray.subarray(b, b + 16)));
-          ecb.set(ct.subarray(0, 16), b);
-        }
-        paintGray(document.getElementById('canvas-ecb'), ecb, N);
-
-        const gcmKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt']);
-        const gcm = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: crypto.getRandomValues(new Uint8Array(12)) }, gcmKey, gray));
-        paintGray(document.getElementById('canvas-gcm'), gcm.subarray(0, N * N), N);
-      } catch (e) {
-        tuxDrawn = false;
       }
     }
 

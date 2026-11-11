@@ -109,6 +109,20 @@
         <h3>❌ Modo ECB (Electronic Codebook) - Proibido!</h3>
         <p>No modo ECB, cada bloco de 16 bytes do dado é criptografado de forma isolada com a mesma chave. Se o dado tiver partes repetidas (como pixels do mesmo tom em uma imagem ou campos com zeros à esquerda), o texto cifrado gerará <strong>exatamente os mesmos blocos repetidos</strong>.</p>
         <p><em>O Caso Famoso:</em> Criptografar uma imagem do mascote do Linux (Tux) em ECB gera um arquivo todo cifrado onde a silhueta inteira do pinguim continua perfeitamente visível a olho nu! Não há dispersão.</p>
+        <div style="display: flex; justify-content: space-around; align-items: flex-end; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; text-align: center;">
+          <div>
+            <img src="../assets/Tux.png" alt="Pinguim Tux original" style="width: 130px; height: 154px; object-fit: contain; border: 1px solid var(--card-border); border-radius: 4px; display: block; margin: 0 auto 0.4rem; background: #fff;">
+            <small style="font-family: var(--font-mono); font-weight: 600;">Original</small>
+          </div>
+          <div>
+            <img src="../assets/Tux_ecb.png" alt="Pinguim Tux cifrado com AES-ECB" style="width: 130px; height: 154px; object-fit: contain; border: 1px solid var(--danger); border-radius: 4px; display: block; margin: 0 auto 0.4rem; background: #fff;">
+            <small style="font-family: var(--font-mono); font-weight: 600; color: var(--danger);">AES-ECB (Silhueta visível)</small>
+          </div>
+          <div>
+            <img src="../assets/Tux_cbc.png" alt="Pinguim Tux cifrado com AES-CBC" style="width: 130px; height: 154px; object-fit: contain; border: 1px solid var(--success); border-radius: 4px; display: block; margin: 0 auto 0.4rem; background: #fff;">
+            <small style="font-family: var(--font-mono); font-weight: 600; color: var(--success);">AES-CBC (Ruído aleatório)</small>
+          </div>
+        </div>
       </div>
 
       <div class="card alert-warning">
